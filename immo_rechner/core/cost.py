@@ -80,9 +80,6 @@ class AccusationCost(PurchaseCost):
         super().__init__(
             purchase_price=purchase_price,
             land_value=land_value,
-
-
-
             approximate_land_value=approximate_land_value,
         )
         self.makler = makler
