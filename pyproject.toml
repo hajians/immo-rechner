@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "immo-rechner"
+version = "0.1.0"
+description = "A repository for evaluating profitability of an immobilien."
+authors = ["Soheil Hajian <soheil.hajian@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+pre-commit = "^3.8.0"
+black = "^24.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
