@@ -3,11 +3,15 @@ from typing import Optional
 
 from immo_rechner.core.abstract_position import AbstractPosition
 
+N_MONTHS = 12
+
 
 class BuildingMaintenance(AbstractPosition):
     """
     BuildingMaintenance corresponds to Hausgeld.
     """
+
+    is_cashflow = True
 
     def __init__(
         self, monthly_cost: Optional[int] = None, yearly_cost: Optional[int] = None
@@ -15,14 +19,14 @@ class BuildingMaintenance(AbstractPosition):
         if (not monthly_cost) and (not yearly_cost):
             raise ValueError("Either monthly_cost or yearly_cost should be not None.")
 
-        self.yearly_cost = monthly_cost * 12
+        self.yearly_cost = monthly_cost * N_MONTHS
 
     def evaluate(self, *args, **kwargs):
         return self.yearly_cost
 
 
 class InterestRate(AbstractPosition):
-    N_MONTHS = 12
+    is_cashflow = True
 
     def __init__(
         self, yearly_rate: float, repayment_amount: float, initial_debt: float
@@ -36,26 +40,28 @@ class InterestRate(AbstractPosition):
         self.remaining_debt = self.initial_debt
 
     def pay_interest_per_month(self):
-        cost = (self.yearly_rate / self.N_MONTHS) * self.remaining_debt
+        cost = (self.yearly_rate / N_MONTHS) * self.remaining_debt
         self.remaining_debt -= self.repayment_amount - cost
 
         return cost
 
     def evaluate(self, *args, **kwargs):
         total_costs = 0
-        for _ in range(self.N_MONTHS):
+        for _ in range(N_MONTHS):
             total_costs += self.pay_interest_per_month()
 
         return total_costs
 
 
 class PurchaseCost(AbstractPosition, ABC):
+    is_cashflow = False
 
     def __init__(
         self,
         purchase_price: float,
         land_value: Optional[float] = None,
         approximate_land_value: bool = True,
+        depreciation_rate: float = 0.02,
     ):
         self.purchase_price = purchase_price
         if (land_value is None) and (not approximate_land_value):
@@ -65,8 +71,13 @@ class PurchaseCost(AbstractPosition, ABC):
             0.2 * self.purchase_price if approximate_land_value else land_value
         )
 
+        self.depreciation_rate = depreciation_rate
 
-class AccusationCost(PurchaseCost):
+    def evaluate(self, *args, **kwargs):
+        return self.depreciation_rate * (self.purchase_price - self.land_value)
+
+
+class PurchaseSideCost(PurchaseCost):
 
     def __init__(
         self,
@@ -87,4 +98,8 @@ class AccusationCost(PurchaseCost):
         self.transfer_tax = transfer_tax
 
     def evaluate(self, *args, **kwargs):
-        return (self.makler + self.notar + self.transfer_tax) * self.purchase_price
+        return (
+            (self.makler + self.notar + self.transfer_tax)
+            * self.purchase_price
+            * self.depreciation_rate
+        )

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from immo_rechner.core.cost import InterestRate, AccusationCost
+from immo_rechner.core.cost import InterestRate, PurchaseSideCost
 
 
 class TestCosts(TestCase):
@@ -18,10 +18,10 @@ class TestCosts(TestCase):
 
     def test_evaluate_accusation_costs(self):
         # Given
-        ac = AccusationCost(purchase_price=100)
+        ac = PurchaseSideCost(purchase_price=100)
 
         # When
         total_costs = ac.evaluate()
 
         # Then
-        self.assertAlmostEquals(total_costs, 11.07)
+        self.assertAlmostEquals(total_costs, 11.07 * ac.depreciation_rate)
