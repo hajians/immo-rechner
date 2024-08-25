@@ -14,18 +14,26 @@ class BuildingMaintenance(AbstractPosition):
     is_cashflow = True
 
     def __init__(
-        self, monthly_cost: Optional[int] = None, yearly_cost: Optional[int] = None
+        self,
+        owner_share: float = 0.5,
+        monthly_cost: Optional[float] = None,
+        yearly_cost: Optional[float] = None,
     ):
         if (not monthly_cost) and (not yearly_cost):
             raise ValueError("Either monthly_cost or yearly_cost should be not None.")
 
         self.yearly_cost = monthly_cost * N_MONTHS
+        self.owner_share = owner_share
 
     def evaluate(self, *args, **kwargs):
-        return self.yearly_cost
+        return -self.yearly_cost * self.owner_share
 
 
 class InterestRate(AbstractPosition):
+    """
+    Class for computing interest rate
+    """
+
     is_cashflow = True
 
     def __init__(
@@ -35,6 +43,7 @@ class InterestRate(AbstractPosition):
         self.remaining_debt = initial_debt
         self.repayment_amount = repayment_amount
         self.initial_debt = initial_debt
+        self.counter = 0
 
     def reset(self):
         self.remaining_debt = self.initial_debt
@@ -43,6 +52,8 @@ class InterestRate(AbstractPosition):
         cost = (self.yearly_rate / N_MONTHS) * self.remaining_debt
         self.remaining_debt -= self.repayment_amount - cost
 
+        self.counter += 1
+
         return cost
 
     def evaluate(self, *args, **kwargs):
@@ -50,7 +61,7 @@ class InterestRate(AbstractPosition):
         for _ in range(N_MONTHS):
             total_costs += self.pay_interest_per_month()
 
-        return total_costs
+        return -total_costs
 
 
 class PurchaseCost(AbstractPosition, ABC):
@@ -74,7 +85,7 @@ class PurchaseCost(AbstractPosition, ABC):
         self.depreciation_rate = depreciation_rate
 
     def evaluate(self, *args, **kwargs):
-        return self.depreciation_rate * (self.purchase_price - self.land_value)
+        return -self.depreciation_rate * (self.purchase_price - self.land_value)
 
 
 class PurchaseSideCost(PurchaseCost):
@@ -98,7 +109,7 @@ class PurchaseSideCost(PurchaseCost):
         self.transfer_tax = transfer_tax
 
     def evaluate(self, *args, **kwargs):
-        return (
+        return -(
             (self.makler + self.notar + self.transfer_tax)
             * self.purchase_price
             * self.depreciation_rate
