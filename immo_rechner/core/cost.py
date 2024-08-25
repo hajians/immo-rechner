@@ -10,7 +10,7 @@ class BuildingMaintenance(AbstractPosition):
     """
 
     def __init__(
-            self, monthly_cost: Optional[int] = None, yearly_cost: Optional[int] = None
+        self, monthly_cost: Optional[int] = None, yearly_cost: Optional[int] = None
     ):
         if (not monthly_cost) and (not yearly_cost):
             raise ValueError("Either monthly_cost or yearly_cost should be not None.")
@@ -25,7 +25,7 @@ class InterestRate(AbstractPosition):
     N_MONTHS = 12
 
     def __init__(
-            self, yearly_rate: float, repayment_amount: float, initial_debt: float
+        self, yearly_rate: float, repayment_amount: float, initial_debt: float
     ):
         self.yearly_rate = yearly_rate
         self.remaining_debt = initial_debt
@@ -52,31 +52,39 @@ class InterestRate(AbstractPosition):
 class PurchaseCost(AbstractPosition, ABC):
 
     def __init__(
-            self,
-            purchase_price: float,
-            land_value: Optional[float] = None,
-            approximate_land_value: bool = True,
+        self,
+        purchase_price: float,
+        land_value: Optional[float] = None,
+        approximate_land_value: bool = True,
     ):
         self.purchase_price = purchase_price
         if (land_value is None) and (not approximate_land_value):
             raise ValueError(f"land_value is None and approximate_land_value is False.")
 
-        self.land_value = 0.2 * self.purchase_price if approximate_land_value else land_value
+        self.land_value = (
+            0.2 * self.purchase_price if approximate_land_value else land_value
+        )
 
 
 class AccusationCost(PurchaseCost):
 
     def __init__(
-            self,
-            purchase_price: float,
-            land_value: Optional[float] = None,
-            approximate_land_value: bool = True,
-            makler: float = 0.0357,
-            notar: float = 0.015,
-            transfer_tax: float = 0.06,
+        self,
+        purchase_price: float,
+        land_value: Optional[float] = None,
+        approximate_land_value: bool = True,
+        makler: float = 0.0357,
+        notar: float = 0.015,
+        transfer_tax: float = 0.06,
     ):
-        super().__init__(purchase_price=purchase_price, land_value=land_value,
-                         approximate_land_value=approximate_land_value)
+        super().__init__(
+            purchase_price=purchase_price,
+            land_value=land_value,
+
+
+
+            approximate_land_value=approximate_land_value,
+        )
         self.makler = makler
         self.notar = notar
         self.transfer_tax = transfer_tax
