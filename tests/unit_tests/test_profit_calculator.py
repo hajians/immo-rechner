@@ -80,7 +80,7 @@ class TestProfitCalculator(TestCase):
                 YearlySummary(
                     profit_before_taxes=6000 - 977.01,
                     income_tax=1004.59,
-                    cashflow=4068.84,
+                    cashflow=4018.38,
                 ),
             ),
             (
@@ -91,7 +91,7 @@ class TestProfitCalculator(TestCase):
                     where p is interest rate per year, x is the amount we pay towards mortgage.                             
                     For no profit scenario we would like to have delta == 0.0, i.e., all we paid per month
                     went for interest rate, aka no profit.
-            """
+                """
                 "with_interest_rate_no_profit",
                 get_positions(
                     monthly_rent=416.6666,
@@ -102,6 +102,21 @@ class TestProfitCalculator(TestCase):
                     depreciation_rate=0.0,
                 ),
                 YearlySummary(profit_before_taxes=0.0, income_tax=0.0, cashflow=0.0),
+            ),
+            (
+                "with_interest_rate_profit_depreciation",
+                get_positions(
+                    monthly_rent=416.6666,
+                    owner_share=0.0,
+                    repayment_amount=416.6666,
+                    yearly_interest_rate=0.05,
+                    initial_debt=100_000,
+                    depreciation_rate=0.01,
+                    purchase_price=200_000,
+                ),
+                YearlySummary(
+                    profit_before_taxes=-1600.0, income_tax=-320.0, cashflow=320.0
+                ),
             ),
         ]
     )
