@@ -19,15 +19,16 @@ def get_result(repayment_amount):
         purchase_price=500_000,
     )
 
+
 def get_app():
     app = Dash()
     app.layout = [
-        html.H1(children="Immobilien Rechner", style={'textAlign':'center'}),
+        html.H1(children="Immobilien Rechner", style={"textAlign": "center"}),
         html.H2(
             children=[
-            "Repayment (lower)",
-            dcc.Textarea(id="repayment-value-lb", value="500.0"),
-        ]
+                "Repayment (lower)",
+                dcc.Textarea(id="repayment-value-lb", value="500.0"),
+            ]
         ),
         html.H2(
             children=[
@@ -41,7 +42,7 @@ def get_app():
                 dcc.Textarea(id="repayment-value-step", value="200.0"),
             ]
         ),
-        dcc.Graph(id='graph-cashflow')
+        dcc.Graph(id="graph-cashflow"),
     ]
 
     @callback(
@@ -67,7 +68,7 @@ def get_app():
 
     return app
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     app = get_app()
     app.run(debug=True)
-

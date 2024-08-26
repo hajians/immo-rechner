@@ -37,7 +37,6 @@ def get_positions(
 
 class TestProfitCalculator(TestCase):
 
-
     @staticmethod
     def get_profit_calculator():
         return ProfitCalculator.from_raw_data(
@@ -166,7 +165,6 @@ class TestProfitCalculator(TestCase):
         )
         self.assertAlmostEquals(output.income_tax, expected_output.income_tax, places=1)
         self.assertAlmostEquals(output.cashflow, expected_output.cashflow, places=1)
-
 
     def test_simulate(self):
         # Given
