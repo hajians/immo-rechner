@@ -28,6 +28,7 @@ class YearlySummary(BaseModel):
     def tax_benefit(self) -> float:
         return -self.income_tax
 
+
 class ProfitCalculator:
 
     @staticmethod
@@ -52,10 +53,10 @@ class ProfitCalculator:
             return 0.42 * taxable_income - 10_602.13
         elif 17_006 <= taxable_income <= 66_761:
             z = (taxable_income - 17_005) / 10_000
-            return (181_19*z + 2397) * z + 1025.38
+            return (181_19 * z + 2397) * z + 1025.38
         elif 11_605 <= taxable_income <= 17_006:
             z = (taxable_income - 11_605) / 10_000
-            return (922.98*z + 1400) * z
+            return (922.98 * z + 1400) * z
         elif taxable_income <= 11_605:
             return 0.0
         else:
