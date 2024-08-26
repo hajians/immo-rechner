@@ -134,8 +134,12 @@ class TestProfitCalculator(TestCase):
             ),
         ]
     )
-    @mock.patch("immo_rechner.core.profit_calculator.ProfitCalculator.get_yearly_income_tax")
-    def test_yearly_simulation(self, name, positions, expected_output: YearlySummary, mock_tax):
+    @mock.patch(
+        "immo_rechner.core.profit_calculator.ProfitCalculator.get_yearly_income_tax"
+    )
+    def test_yearly_simulation(
+        self, name, positions, expected_output: YearlySummary, mock_tax
+    ):
         # Given
         pc = ProfitCalculator(positions=positions, yearly_income=100_000)
         mock_tax.side_effect = lambda x: 0.2 * x
@@ -150,7 +154,9 @@ class TestProfitCalculator(TestCase):
         self.assertAlmostEquals(output.income_tax, expected_output.income_tax, places=1)
         self.assertAlmostEquals(output.cashflow, expected_output.cashflow, places=1)
 
-    @mock.patch("immo_rechner.core.profit_calculator.ProfitCalculator.get_yearly_income_tax")
+    @mock.patch(
+        "immo_rechner.core.profit_calculator.ProfitCalculator.get_yearly_income_tax"
+    )
     def test_from_raw_data(self, mock_tax):
         # Given
         pc = self.get_profit_calculator()

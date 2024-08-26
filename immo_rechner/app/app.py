@@ -64,7 +64,11 @@ def get_app():
                 go.Scatter(x=df.year, y=df.cashflow, name=f"repayment: {repayment}"), row=1, col=1
             )
             fig.add_trace(
-                go.Scatter(x=df.year, y=df.tax_benefit, name=f"tax benefit: {repayment}"), row=2, col=1
+                go.Scatter(
+                    x=df.year, y=df.tax_benefit, name=f"tax benefit: {repayment}"
+                ),
+                row=2,
+                col=1,
             )
 
         return fig
