@@ -11,7 +11,7 @@ from immo_rechner.core.cost import (
 )
 from immo_rechner.core.revenue import RentIncome
 from immo_rechner.core.utils import get_logger
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 logger = get_logger(__name__)
 
@@ -23,6 +23,10 @@ class YearlySummary(BaseModel):
     remaining_debt: Optional[float] = None
     interest_cost: Optional[float] = None
 
+    @computed_field
+    @property
+    def tax_benefit(self) -> float:
+        return -self.income_tax
 
 class ProfitCalculator:
 
@@ -75,7 +79,7 @@ class ProfitCalculator:
         return YearlySummary(
             cashflow=cashflow,
             profit_before_taxes=profit_before_taxes,  # This includes depreciation.
-            income_tax=-income_tax_diff,
+            income_tax=income_tax_diff,
             remaining_debt=self.interest_rate_position.remaining_debt,
         )
 

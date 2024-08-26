@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, mock
 
 from parameterized import parameterized
 
@@ -56,7 +56,7 @@ class TestProfitCalculator(TestCase):
         income_tax = ProfitCalculator.get_yearly_income_tax(100_000)
 
         # Then
-        self.assertAlmostEquals(income_tax, 0.2 * 100_000)
+        self.assertAlmostEquals(income_tax, 31397.87)
 
     @parameterized.expand(
         [
@@ -134,9 +134,11 @@ class TestProfitCalculator(TestCase):
             ),
         ]
     )
-    def test_yearly_simulation(self, name, positions, expected_output: YearlySummary):
+    @mock.patch("immo_rechner.core.profit_calculator.ProfitCalculator.get_yearly_income_tax")
+    def test_yearly_simulation(self, name, positions, expected_output: YearlySummary, mock_tax):
         # Given
         pc = ProfitCalculator(positions=positions, yearly_income=100_000)
+        mock_tax.side_effect = lambda x: 0.2 * x
 
         # When
         output = pc.yearly_simulation()
@@ -148,9 +150,11 @@ class TestProfitCalculator(TestCase):
         self.assertAlmostEquals(output.income_tax, expected_output.income_tax, places=1)
         self.assertAlmostEquals(output.cashflow, expected_output.cashflow, places=1)
 
-    def test_from_raw_data(self):
+    @mock.patch("immo_rechner.core.profit_calculator.ProfitCalculator.get_yearly_income_tax")
+    def test_from_raw_data(self, mock_tax):
         # Given
         pc = self.get_profit_calculator()
+        mock_tax.side_effect = lambda x: 0.2 * x
 
         expected_output = YearlySummary(
             profit_before_taxes=-1777.12, income_tax=-355.424, cashflow=355.424
