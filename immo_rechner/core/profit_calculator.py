@@ -18,13 +18,26 @@ class YearlySummary(BaseModel):
     cashflow: float
     profit_before_taxes: float
     income_tax: float
+    remaining_debt: Optional[float] = None
+    interest_cost: Optional[float] = None
 
 
 class ProfitCalculator:
 
+    @staticmethod
+    def fetch_interest_rate_position(positions: List[AbstractPosition]) -> InterestRate:
+        for item in positions:
+            if isinstance(item, InterestRate):
+                logger.info(
+                    f"InterestRate object found: {item}; ignoring next positions."
+                )
+                return item
+
     def __init__(self, positions: List[AbstractPosition], yearly_income: float):
         self.positions = positions
         self.yearly_income = yearly_income
+
+        self.interest_rate_position = self.fetch_interest_rate_position(self.positions)
 
     @staticmethod
     def get_yearly_income_tax(taxable_income: float):
@@ -50,6 +63,7 @@ class ProfitCalculator:
             cashflow=cashflow,
             profit_before_taxes=profit_before_taxes,  # This includes depreciation.
             income_tax=income_tax_diff,
+            remaining_debt=self.interest_rate_position.remaining_debt,
         )
 
     @classmethod
@@ -83,7 +97,6 @@ class ProfitCalculator:
             PurchaseCost(
                 purchase_price=purchase_price,
                 land_value=land_value,
-                approximate_land_value=approximate_land_value,
                 depreciation_rate=depreciation_rate,
             ),
             PurchaseSideCost(
