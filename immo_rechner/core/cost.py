@@ -95,6 +95,7 @@ class PurchaseSideCost(PurchaseCost):
         purchase_price: float,
         land_value: Optional[float] = None,
         approximate_land_value: bool = True,
+        depreciation_rate: float = 0.02,
         makler: float = 0.0357,
         notar: float = 0.015,
         transfer_tax: float = 0.06,
@@ -103,6 +104,7 @@ class PurchaseSideCost(PurchaseCost):
             purchase_price=purchase_price,
             land_value=land_value,
             approximate_land_value=approximate_land_value,
+            depreciation_rate=depreciation_rate,
         )
         self.makler = makler
         self.notar = notar
@@ -111,6 +113,6 @@ class PurchaseSideCost(PurchaseCost):
     def evaluate(self, *args, **kwargs):
         return -(
             (self.makler + self.notar + self.transfer_tax)
-            * self.purchase_price
+            * (self.purchase_price - self.land_value)
             * self.depreciation_rate
         )

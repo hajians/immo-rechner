@@ -11,3 +11,6 @@ class AbstractPosition(ABC):
     @abstractmethod
     def evaluate(self, *args, **kwargs) -> float:
         pass
+
+    def reset(self):
+        pass

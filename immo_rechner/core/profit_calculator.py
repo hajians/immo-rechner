@@ -39,14 +39,17 @@ class ProfitCalculator:
             profit_before_taxes += value
             cashflow += value if position.is_cashflow else 0.0
 
-        income_tax = self.get_yearly_income_tax(profit_before_taxes)
-        logger.info(f"Removing tax ({income_tax}) from cashflow")
-        cashflow -= income_tax
+        income_tax_diff = self.get_yearly_income_tax(
+            self.yearly_income + profit_before_taxes
+        ) - self.get_yearly_income_tax(self.yearly_income)
+
+        logger.info(f"Removing tax ({income_tax_diff}) from cashflow")
+        cashflow -= income_tax_diff
 
         return YearlySummary(
             cashflow=cashflow,
-            profit_before_taxes=profit_before_taxes,
-            income_tax=income_tax,
+            profit_before_taxes=profit_before_taxes,  # This includes depreciation.
+            income_tax=income_tax_diff,
         )
 
     @classmethod
@@ -56,7 +59,7 @@ class ProfitCalculator:
         monthly_rent: float,
         facility_monthly_cost: float,
         owner_share: float,
-        yearly_rate: float,
+        yearly_interest_rate: float,
         repayment_amount: float,
         initial_debt: float,
         purchase_price: float,
@@ -73,7 +76,7 @@ class ProfitCalculator:
                 owner_share=owner_share, monthly_cost=facility_monthly_cost
             ),
             InterestRate(
-                yearly_rate=yearly_rate,
+                yearly_rate=yearly_interest_rate,
                 repayment_amount=repayment_amount,
                 initial_debt=initial_debt,
             ),
@@ -90,6 +93,7 @@ class ProfitCalculator:
                 makler=makler,
                 notar=notar,
                 transfer_tax=transfer_tax,
+                depreciation_rate=depreciation_rate,
             ),
         ]
 
