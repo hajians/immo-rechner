@@ -133,3 +133,31 @@ class TestProfitCalculator(TestCase):
         )
         self.assertAlmostEquals(output.income_tax, expected_output.income_tax, places=1)
         self.assertAlmostEquals(output.cashflow, expected_output.cashflow, places=1)
+
+    def test_from_raw_data(self):
+        # Given
+        pc = ProfitCalculator.from_raw_data(
+            yearly_income=100_000,
+            monthly_rent=416.6666,
+            facility_monthly_cost=200.0,
+            owner_share=0.0,
+            repayment_amount=416.6666,
+            yearly_interest_rate=0.05,
+            initial_debt=100_000,
+            depreciation_rate=0.01,
+            purchase_price=200_000,
+        )
+
+        expected_output = YearlySummary(
+            profit_before_taxes=-1777.12, income_tax=-355.424, cashflow=355.424
+        )
+
+        # When
+        output = pc.yearly_simulation()
+
+        # Then
+        self.assertAlmostEquals(
+            output.profit_before_taxes, expected_output.profit_before_taxes, places=1
+        )
+        self.assertAlmostEquals(output.income_tax, expected_output.income_tax, places=1)
+        self.assertAlmostEquals(output.cashflow, expected_output.cashflow, places=1)
