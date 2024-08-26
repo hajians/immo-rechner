@@ -70,9 +70,9 @@ class PurchaseCost(AbstractPosition, ABC):
     def __init__(
         self,
         purchase_price: float,
+        depreciation_rate: float,
         land_value: Optional[float] = None,
         approximate_land_value: bool = True,
-        depreciation_rate: float = 0.02,
     ):
         self.purchase_price = purchase_price
         if (land_value is None) and (not approximate_land_value):
@@ -93,9 +93,9 @@ class PurchaseSideCost(PurchaseCost):
     def __init__(
         self,
         purchase_price: float,
+        depreciation_rate: float,
         land_value: Optional[float] = None,
         approximate_land_value: bool = True,
-        depreciation_rate: float = 0.02,
         makler: float = 0.0357,
         notar: float = 0.015,
         transfer_tax: float = 0.06,

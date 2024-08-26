@@ -18,7 +18,12 @@ class TestCosts(TestCase):
 
     def test_evaluate_accusation_costs(self):
         # Given
-        ac = PurchaseSideCost(purchase_price=100)
+        ac = PurchaseSideCost(
+            purchase_price=100.0,
+            land_value=0.0,
+            approximate_land_value=False,
+            depreciation_rate=0.01,
+        )
 
         # When
         total_costs = ac.evaluate()
