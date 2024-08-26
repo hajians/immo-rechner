@@ -6,4 +6,4 @@ repos:
       name: black
       entry: poetry run black
       language: system
-      types: [file, python]
+      types: [file, python, jupyter]

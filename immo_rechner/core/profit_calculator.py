@@ -1,4 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Union, Dict
+
+import pandas as pd
 
 from immo_rechner.core.abstract_position import AbstractPosition
 from immo_rechner.core.cost import (
@@ -56,7 +58,7 @@ class ProfitCalculator:
             self.yearly_income + profit_before_taxes
         ) - self.get_yearly_income_tax(self.yearly_income)
 
-        logger.info(f"Removing tax ({income_tax_diff}) from cashflow")
+        logger.debug(f"Removing tax ({income_tax_diff}) from cashflow")
         cashflow -= income_tax_diff
 
         return YearlySummary(
@@ -65,6 +67,18 @@ class ProfitCalculator:
             income_tax=income_tax_diff,
             remaining_debt=self.interest_rate_position.remaining_debt,
         )
+
+    def simulate(
+        self, n_years: int, to_pandas: bool = False
+    ) -> Union[List, pd.DataFrame]:
+        output = []
+        for year in range(n_years):
+            output.append(dict(year=year, **self.yearly_simulation().dict()))
+
+        if to_pandas:
+            return pd.DataFrame.from_records(output)
+
+        return output
 
     @classmethod
     def from_raw_data(
