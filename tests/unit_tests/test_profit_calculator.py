@@ -37,6 +37,21 @@ def get_positions(
 
 class TestProfitCalculator(TestCase):
 
+
+    @staticmethod
+    def get_profit_calculator():
+        return ProfitCalculator.from_raw_data(
+            yearly_income=100_000,
+            monthly_rent=416.6666,
+            facility_monthly_cost=200.0,
+            owner_share=0.0,
+            repayment_amount=416.6666,
+            yearly_interest_rate=0.05,
+            initial_debt=100_000,
+            depreciation_rate=0.01,
+            purchase_price=200_000,
+        )
+
     def test_get_yearly_income_tax(self):
         # When
         income_tax = ProfitCalculator.get_yearly_income_tax(100_000)
@@ -136,17 +151,7 @@ class TestProfitCalculator(TestCase):
 
     def test_from_raw_data(self):
         # Given
-        pc = ProfitCalculator.from_raw_data(
-            yearly_income=100_000,
-            monthly_rent=416.6666,
-            facility_monthly_cost=200.0,
-            owner_share=0.0,
-            repayment_amount=416.6666,
-            yearly_interest_rate=0.05,
-            initial_debt=100_000,
-            depreciation_rate=0.01,
-            purchase_price=200_000,
-        )
+        pc = self.get_profit_calculator()
 
         expected_output = YearlySummary(
             profit_before_taxes=-1777.12, income_tax=-355.424, cashflow=355.424
@@ -161,3 +166,16 @@ class TestProfitCalculator(TestCase):
         )
         self.assertAlmostEquals(output.income_tax, expected_output.income_tax, places=1)
         self.assertAlmostEquals(output.cashflow, expected_output.cashflow, places=1)
+
+
+    def test_simulate(self):
+        # Given
+        pc = self.get_profit_calculator()
+
+        # When
+        output = pc.simulate(n_years=10)
+        output_pd = pc.simulate(n_years=10, to_pandas=True)
+
+        # Then
+        self.assertEqual(len(output), 10)
+        self.assertEqual(output_pd.shape[0], 10)
