@@ -11,7 +11,7 @@ from immo_rechner.core.revenue import RentIncome
 from immo_rechner.core.utils import get_logger
 from pydantic import BaseModel
 
-logger = get_logger(__file__)
+logger = get_logger(__name__)
 
 
 class YearlySummary(BaseModel):
@@ -35,8 +35,9 @@ class ProfitCalculator:
         profit_before_taxes = 0
         cashflow = 0
         for position in self.positions:
-            profit_before_taxes += position.evaluate()
-            cashflow += position.evaluate() if position.is_cashflow else 0.0
+            value = position.evaluate()
+            profit_before_taxes += value
+            cashflow += value if position.is_cashflow else 0.0
 
         income_tax = self.get_yearly_income_tax(profit_before_taxes)
         logger.info(f"Removing tax ({income_tax}) from cashflow")
