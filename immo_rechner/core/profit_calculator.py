@@ -42,9 +42,20 @@ class ProfitCalculator:
         self.interest_rate_position = self.fetch_interest_rate_position(self.positions)
 
     @staticmethod
-    def get_yearly_income_tax(taxable_income: float):
-        # TODO: Write a proper logic for this
-        return 0.2 * taxable_income
+    def get_yearly_income_tax(taxable_income: float) -> float:
+        # TODO: Double check this definition
+        if 66_761 <= taxable_income <= 277_825:
+            return 0.42 * taxable_income - 10_602.13
+        elif 17_006 <= taxable_income <= 66_761:
+            z = (taxable_income - 17_005) / 10_000
+            return (181_19*z + 2397) * z + 1025.38
+        elif 11_605 <= taxable_income <= 17_006:
+            z = (taxable_income - 11_605) / 10_000
+            return (922.98*z + 1400) * z
+        elif taxable_income <= 11_605:
+            return 0.0
+        else:
+            raise ValueError(f"taxable_income {taxable_income} is not acceptable.")
 
     def yearly_simulation(self):
         profit_before_taxes = 0
@@ -64,7 +75,7 @@ class ProfitCalculator:
         return YearlySummary(
             cashflow=cashflow,
             profit_before_taxes=profit_before_taxes,  # This includes depreciation.
-            income_tax=income_tax_diff,
+            income_tax=-income_tax_diff,
             remaining_debt=self.interest_rate_position.remaining_debt,
         )
 

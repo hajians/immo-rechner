@@ -33,13 +33,13 @@ def get_app():
         html.H2(
             children=[
                 "Repayment (upper)",
-                dcc.Textarea(id="repayment-value-up", value="1500.0"),
+                dcc.Textarea(id="repayment-value-up", value="2000.0"),
             ]
         ),
         html.H2(
             children=[
                 "Repayment (step)",
-                dcc.Textarea(id="repayment-value-step", value="200.0"),
+                dcc.Textarea(id="repayment-value-step", value="500.0"),
             ]
         ),
         dcc.Graph(id="graph-cashflow"),
@@ -56,12 +56,15 @@ def get_app():
         repayment_ub = float(repayment_ub)
         step = float(repayment_step) if float(repayment_step) > 0 else 100
 
-        fig = make_subplots()
+        fig = make_subplots(rows=2, cols=1)
 
         for repayment in np.arange(repayment_lb, repayment_ub, step):
             df = get_result(repayment).simulate(n_years=10, to_pandas=True)
             fig.add_trace(
-                go.Scatter(x=df.year, y=df.cashflow, name=f"repayment: {repayment}")
+                go.Scatter(x=df.year, y=df.cashflow, name=f"repayment: {repayment}"), row=1, col=1
+            )
+            fig.add_trace(
+                go.Scatter(x=df.year, y=df.income_tax, name=f"diff income tax: {repayment}"), row=2, col=1
             )
 
         return fig
