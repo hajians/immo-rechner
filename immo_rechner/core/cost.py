@@ -22,7 +22,7 @@ class BuildingMaintenance(AbstractPosition):
         if (not monthly_cost) and (not yearly_cost):
             raise ValueError("Either monthly_cost or yearly_cost should be not None.")
 
-        self.yearly_cost = monthly_cost * N_MONTHS
+        self.yearly_cost = monthly_cost * N_MONTHS if monthly_cost else yearly_cost
         self.owner_share = owner_share
 
     def evaluate(self, *args, **kwargs):
