@@ -29,6 +29,23 @@ class YearlySummary(BaseModel):
         return -self.income_tax
 
 
+class InputParameters(BaseModel):
+    yearly_income: float
+    monthly_rent: float
+    facility_monthly_cost: float
+    owner_share: float
+    yearly_interest_rate: float
+    repayment_amount: float
+    initial_debt: float
+    purchase_price: float
+    land_value: Optional[float] = None
+    approximate_land_value: bool = True
+    depreciation_rate: float = 0.02
+    makler: float = 0.0357
+    notar: float = 0.015
+    transfer_tax: float = 0.06
+
+
 class ProfitCalculator:
 
     @staticmethod
@@ -53,7 +70,7 @@ class ProfitCalculator:
             return 0.42 * taxable_income - 10_602.13
         elif 17_006 <= taxable_income <= 66_761:
             z = (taxable_income - 17_005) / 10_000
-            return (181_19 * z + 2397) * z + 1025.38
+            return (181.19 * z + 2397) * z + 1025.38
         elif 11_605 <= taxable_income <= 17_006:
             z = (taxable_income - 11_605) / 10_000
             return (922.98 * z + 1400) * z
