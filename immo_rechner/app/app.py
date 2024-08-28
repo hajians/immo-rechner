@@ -35,6 +35,12 @@ def get_app():
                 dcc.Textarea(id="initial-debt", value="450000"),
             ]
         ),
+        html.H2(
+            children=[
+                "Number of years",
+                dcc.Slider(5, 30, 5, value=10, id="num-years"),
+            ]
+        ),
         dcc.Graph(id="graph-cashflow"),
     ]
 
@@ -46,6 +52,7 @@ def get_app():
         Input("yearly-income", "value"),
         Input("monthly-rent", "value"),
         Input("initial-debt", "value"),
+        Input("num-years", "value"),
     )
     def update_graph(
         repayment_lb,
@@ -54,6 +61,7 @@ def get_app():
         yearly_income,
         month_rent,
         initial_debt,
+        num_years,
     ):
         repayment_lb = float(repayment_lb)
         repayment_ub = float(repayment_ub)
@@ -74,7 +82,7 @@ def get_app():
                 purchase_price=500_000,
             )
             df = ProfitCalculator.from_raw_data(**input_parameters.dict()).simulate(
-                n_years=10, to_pandas=True
+                n_years=num_years, to_pandas=True
             )
             fig.add_trace(
                 go.Scatter(x=df.year, y=df.cashflow, name=f"repayment: {repayment}"),
