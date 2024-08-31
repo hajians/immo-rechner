@@ -1,3 +1,5 @@
+import os.path
+
 import numpy as np
 from dash import Dash, html, dcc, callback, Output, Input
 from plotly.subplots import make_subplots
@@ -5,81 +7,160 @@ from plotly.subplots import make_subplots
 from immo_rechner.core.profit_calculator import ProfitCalculator, InputParameters
 import plotly.graph_objects as go
 
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSET_PATH = os.path.join(FILE_DIR, "assets")
+
+CSS_PATHS = [os.path.join(ASSET_PATH, "css", filename) for filename in ["w3.css"]]
+
+
+def get_income_table():
+    return html.Table(
+        className="w3-table w3-bordered",
+        children=[
+            html.Th("Revenues", colSpan=2, className="w3-teal"),
+            html.Tr(
+                children=[
+                    html.Td("Yearly income"),
+                    html.Td(
+                        dcc.Textarea(id="yearly-income", value="100000"),
+                    ),
+                ]
+            ),
+            html.Tr(
+                children=[
+                    html.Td("Monthly rent "),
+                    html.Td(dcc.Textarea(id="monthly-rent", value="1500.0")),
+                ]
+            ),
+        ],
+    )
+
+
+def get_cost_table():
+    return html.Table(
+        className="w3-table w3-bordered",
+        children=[
+            html.Th("Costs", colSpan=4, className="w3-red"),
+            html.Tr(
+                children=[
+                    html.Td("Initial loan amount"),
+                    html.Td(dcc.Textarea(id="initial-debt", value="450000")),
+                    html.Td("Yearly interest rate"),
+                    html.Td(
+                        dcc.Textarea(id="interest-rate", value="0.035"),
+                    ),
+                ],
+            ),
+            html.Tr(
+                children=[
+                    html.Td("Loan repayment range"),
+                    html.Td(
+                        dcc.RangeSlider(
+                            min=500,
+                            max=3000,
+                            step=500,
+                            value=[500, 1500],
+                            id="repayment-range",
+                        ),
+                        colSpan=3,
+                    ),
+                ]
+            ),
+            html.Tr(
+                children=[
+                    html.Td("Facility monthly costs (Hausgeld)"),
+                    html.Td(
+                        dcc.Input(
+                            350, min=0, step=1, id="facility-costs", type="number"
+                        )
+                    ),
+                ]
+            ),
+            html.Tr(
+                children=[
+                    html.Td("Purchase price"),
+                    html.Td(
+                        dcc.Input(
+                            500000, min=0, step=1, id="purchase-price", type="number"
+                        )
+                    ),
+                ]
+            ),
+        ],
+    )
+
+
+def get_additional_params():
+    return html.Table(
+        className="w3-table w3-bordered",
+        children=[
+            html.Th("Simulation parameters", colSpan=2, className="w3-blue"),
+            html.Tr(
+                children=[
+                    html.Td("Number of years"),
+                    html.Td(
+                        dcc.Input(
+                            10, min=5, max=100, step=1, id="num-years", type="number"
+                        )
+                    ),
+                ],
+            ),
+        ],
+    )
+
 
 def get_app():
-    app = Dash()
+    app = Dash(__name__, external_stylesheets=CSS_PATHS)
     app.title = "Immobilien Rechner"
     app.layout = [
-        html.H1(children="Immobilien Rechner", style={"textAlign": "center"}),
-        html.H2(
-            children=[
-                "Yearly income ",
-                dcc.Textarea(id="yearly-income", value="100000"),
-            ]
+        html.H1(
+            children="Immobilien Rechner", className="w3-container w3-2xlarge w3-center"
         ),
-        html.H2(
+        html.Table(
+            className="w3-container w3-table w3-center",
             children=[
-                "(Repayment) upper ",
-                dcc.Textarea(id="repayment-value-up", value="2000.0"),
-                "lower ",
-                dcc.Textarea(id="repayment-value-lb", value="500.0"),
-                "step ",
-                dcc.Textarea(id="repayment-value-step", value="500.0"),
-            ]
-        ),
-        html.H2(
-            children=[
-                "Monthly rent ",
-                dcc.Textarea(id="monthly-rent", value="1500.0"),
-                "Initial debt ",
-                dcc.Textarea(id="initial-debt", value="450000"),
-            ]
-        ),
-        html.H2(
-            children=[
-                "Number of years",
-                dcc.Slider(5, 30, 5, value=10, id="num-years"),
-            ]
+                html.Td(get_income_table()),
+                html.Td(get_cost_table()),
+                html.Td(get_additional_params()),
+            ],
         ),
         dcc.Graph(id="graph-cashflow"),
     ]
 
     @callback(
         Output("graph-cashflow", "figure"),
-        Input("repayment-value-lb", "value"),
-        Input("repayment-value-up", "value"),
-        Input("repayment-value-step", "value"),
+        Input("repayment-range", "value"),
         Input("yearly-income", "value"),
         Input("monthly-rent", "value"),
         Input("initial-debt", "value"),
         Input("num-years", "value"),
+        Input("interest-rate", "value"),
+        Input("facility-costs", "value"),
+        Input("purchase-price", "value"),
     )
     def update_graph(
-        repayment_lb,
-        repayment_ub,
-        repayment_step,
+        repayment_range,
         yearly_income,
         month_rent,
         initial_debt,
         num_years,
+        interest_rate,
+        facility_costs,
+        purchase_price,
     ):
-        repayment_lb = float(repayment_lb)
-        repayment_ub = float(repayment_ub)
-        step = float(repayment_step) if float(repayment_step) > 0 else 100
-
         fig = make_subplots(rows=2, cols=1)
 
-        for repayment in np.arange(repayment_lb, repayment_ub, step):
+        for repayment in np.arange(*repayment_range, 500):
             input_parameters = InputParameters(
                 yearly_income=yearly_income,
                 monthly_rent=month_rent,
-                facility_monthly_cost=350.0,
+                facility_monthly_cost=facility_costs,
                 owner_share=0.5,
                 repayment_amount=repayment,
-                yearly_interest_rate=0.035,
+                yearly_interest_rate=interest_rate,
                 initial_debt=initial_debt,
                 depreciation_rate=0.02,
-                purchase_price=500_000,
+                purchase_price=purchase_price,
             )
             df = ProfitCalculator.from_raw_data(**input_parameters.dict()).simulate(
                 n_years=num_years, to_pandas=True
