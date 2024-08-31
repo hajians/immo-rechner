@@ -3,7 +3,7 @@ from dash import html, dcc
 
 def get_income_table():
     return html.Table(
-        className="w3-table w3-bordered w3-third",
+        className="w3-table w3-bordered",
         children=[
             html.Th("Revenues", colSpan=2, className="w3-teal"),
             html.Tr(
@@ -36,7 +36,7 @@ def get_income_table():
 
 def get_cost_table():
     return html.Table(
-        className="w3-table w3-bordered w3-third",
+        className="w3-table w3-bordered",
         children=[
             html.Th("Costs", colSpan=4, className="w3-red"),
             html.Tr(
@@ -131,7 +131,7 @@ def get_cost_table():
 
 def get_additional_params():
     return html.Table(
-        className="w3-table w3-bordered w3-third",
+        className="w3-table w3-bordered",
         children=[
             html.Th("Simulation parameters", colSpan=2, className="w3-blue"),
             html.Tr(
