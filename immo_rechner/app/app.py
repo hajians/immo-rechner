@@ -31,8 +31,8 @@ def get_app():
         html.H1(
             children="Immobilien Rechner", className="w3-container w3-2xlarge w3-center"
         ),
-        html.Div(
-            className="w3-row w3-center",
+        html.Table(
+            className="w3-container w3-table w3-center",
             children=[
                 html.Td(get_income_table()),
                 html.Td(get_cost_table()),
