@@ -3,21 +3,31 @@ from dash import html, dcc
 
 def get_income_table():
     return html.Table(
-        className="w3-table w3-bordered",
+        className="w3-table w3-bordered w3-third",
         children=[
             html.Th("Revenues", colSpan=2, className="w3-teal"),
             html.Tr(
                 children=[
                     html.Td("Yearly income"),
                     html.Td(
-                        dcc.Textarea(id="yearly-income", value="100000"),
+                        dcc.Input(
+                            id="yearly-income",
+                            value=100000,
+                            type="number",
+                            min=1,
+                            step=1,
+                        ),
                     ),
                 ]
             ),
             html.Tr(
                 children=[
                     html.Td("Monthly rent "),
-                    html.Td(dcc.Textarea(id="monthly-rent", value="1500.0")),
+                    html.Td(
+                        dcc.Input(
+                            id="monthly-rent", value=1500, type="number", min=1, step=1
+                        )
+                    ),
                 ]
             ),
         ],
@@ -26,16 +36,41 @@ def get_income_table():
 
 def get_cost_table():
     return html.Table(
-        className="w3-table w3-bordered",
+        className="w3-table w3-bordered w3-third",
         children=[
             html.Th("Costs", colSpan=4, className="w3-red"),
             html.Tr(
                 children=[
-                    html.Td("Initial loan amount"),
-                    html.Td(dcc.Textarea(id="initial-debt", value="450000")),
-                    html.Td("Yearly interest rate"),
+                    html.Td("Purchase price"),
                     html.Td(
-                        dcc.Textarea(id="interest-rate", value="0.035"),
+                        dcc.Input(
+                            500000, min=0, step=1, id="purchase-price", type="number"
+                        )
+                    ),
+                ]
+            ),
+            html.Tr(
+                children=[
+                    html.Td("Initial loan amount"),
+                    html.Td(
+                        dcc.Input(
+                            id="initial-debt",
+                            value=450000,
+                            min=1,
+                            type="number",
+                            step=1,
+                        )
+                    ),
+                    html.Td("Yearly interest rate (%)"),
+                    html.Td(
+                        dcc.Input(
+                            3.55,
+                            min=0,
+                            max=100,
+                            step=0.01,
+                            id="interest-rate",
+                            type="number",
+                        )
                     ),
                 ],
             ),
@@ -62,14 +97,30 @@ def get_cost_table():
                             350, min=0, step=1, id="facility-costs", type="number"
                         )
                     ),
+                    html.Td("Owner's share (%)"),
+                    html.Td(
+                        dcc.Input(
+                            50,
+                            min=0,
+                            max=100,
+                            step=1,
+                            id="facility-costs-owner-share",
+                            type="number",
+                        )
+                    ),
                 ]
             ),
             html.Tr(
                 children=[
-                    html.Td("Purchase price"),
+                    html.Td("Depreciation rate (%) per year (for taxes)"),
                     html.Td(
                         dcc.Input(
-                            500000, min=0, step=1, id="purchase-price", type="number"
+                            2,
+                            min=0,
+                            max=100,
+                            step=1,
+                            id="depreciation-rate",
+                            type="number",
                         )
                     ),
                 ]
@@ -80,7 +131,7 @@ def get_cost_table():
 
 def get_additional_params():
     return html.Table(
-        className="w3-table w3-bordered",
+        className="w3-table w3-bordered w3-third",
         children=[
             html.Th("Simulation parameters", colSpan=2, className="w3-blue"),
             html.Tr(

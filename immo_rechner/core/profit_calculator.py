@@ -65,16 +65,23 @@ class ProfitCalculator:
 
     @staticmethod
     def get_yearly_income_tax(taxable_income: float) -> float:
-        # TODO: Double check this definition
-        if 66_761 <= taxable_income <= 277_825:
+        """
+        Formula is taken from here:
+            https://www.finanz-tools.de/einkommensteuer/berechnung-formeln/2024
+        :param taxable_income:
+        :return:
+        """
+        if 277_826 <= taxable_income:
+            return 0.45 * taxable_income - 18_936.88
+        elif 66_761 <= taxable_income < 277_826:
             return 0.42 * taxable_income - 10_602.13
-        elif 17_006 <= taxable_income <= 66_761:
+        elif 17_006 <= taxable_income < 66_761:
             z = (taxable_income - 17_005) / 10_000
             return (181.19 * z + 2397) * z + 1025.38
-        elif 11_605 <= taxable_income <= 17_006:
+        elif 11_605 <= taxable_income < 17_006:
             z = (taxable_income - 11_605) / 10_000
             return (922.98 * z + 1400) * z
-        elif taxable_income <= 11_605:
+        elif taxable_income < 11_605:
             return 0.0
         else:
             raise ValueError(f"taxable_income {taxable_income} is not acceptable.")
