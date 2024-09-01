@@ -56,7 +56,7 @@ class TestProfitCalculator(TestCase):
         income_tax = ProfitCalculator.get_yearly_income_tax(100_000)
 
         # Then
-        self.assertAlmostEquals(income_tax, 31397.87)
+        self.assertAlmostEqual(income_tax, 31397.87)
 
     @parameterized.expand(
         [
@@ -148,11 +148,11 @@ class TestProfitCalculator(TestCase):
         output = pc.yearly_simulation()
 
         # Then
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             output.profit_before_taxes, expected_output.profit_before_taxes, places=1
         )
-        self.assertAlmostEquals(output.income_tax, expected_output.income_tax, places=1)
-        self.assertAlmostEquals(output.cashflow, expected_output.cashflow, places=1)
+        self.assertAlmostEqual(output.income_tax, expected_output.income_tax, places=1)
+        self.assertAlmostEqual(output.cashflow, expected_output.cashflow, places=1)
 
     @mock.patch(
         "immo_rechner.core.profit_calculator.ProfitCalculator.get_yearly_income_tax"
@@ -170,11 +170,11 @@ class TestProfitCalculator(TestCase):
         output = pc.yearly_simulation()
 
         # Then
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             output.profit_before_taxes, expected_output.profit_before_taxes, places=1
         )
-        self.assertAlmostEquals(output.income_tax, expected_output.income_tax, places=1)
-        self.assertAlmostEquals(output.cashflow, expected_output.cashflow, places=1)
+        self.assertAlmostEqual(output.income_tax, expected_output.income_tax, places=1)
+        self.assertAlmostEqual(output.cashflow, expected_output.cashflow, places=1)
 
     def test_simulate(self):
         # Given

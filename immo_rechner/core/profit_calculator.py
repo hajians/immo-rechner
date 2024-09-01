@@ -113,7 +113,7 @@ class ProfitCalculator:
     ) -> Union[List, pd.DataFrame]:
         output = []
         for year in range(n_years):
-            output.append(dict(year=year, **self.yearly_simulation().dict()))
+            output.append(dict(year=year, **self.yearly_simulation().model_dump()))
 
         if to_pandas:
             return pd.DataFrame.from_records(output)
