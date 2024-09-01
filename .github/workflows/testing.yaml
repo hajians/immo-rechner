@@ -1,0 +1,25 @@
+name: 'Build and run pytest'
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install requirements
+        run: |
+          pip install poetry==1.8.3
+          poetry install --all-extras
+      - name: Run tests
+        run: |
+          poetry run pytest
