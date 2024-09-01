@@ -88,9 +88,9 @@ def get_app():
                 depreciation_rate=depreciation_precentage / 100,
                 purchase_price=purchase_price,
             )
-            df = ProfitCalculator.from_raw_data(**input_parameters.dict()).simulate(
-                n_years=num_years, to_pandas=True
-            )
+            df = ProfitCalculator.from_raw_data(
+                **input_parameters.model_dump()
+            ).simulate(n_years=num_years, to_pandas=True)
             fig.add_trace(
                 go.Scatter(
                     x=df.year,
