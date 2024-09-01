@@ -13,8 +13,8 @@ class TestCosts(TestCase):
         total_cost = ir.evaluate()
 
         # Then
-        self.assertAlmostEquals(total_cost, -9.23, places=2)
-        self.assertAlmostEquals(ir.remaining_debt, 0, places=1)
+        self.assertAlmostEqual(total_cost, -9.23, places=2)
+        self.assertAlmostEqual(ir.remaining_debt, 0, places=1)
 
     def test_evaluate_accusation_costs(self):
         # Given
@@ -29,4 +29,4 @@ class TestCosts(TestCase):
         total_costs = ac.evaluate()
 
         # Then
-        self.assertAlmostEquals(total_costs, -11.07 * ac.depreciation_rate)
+        self.assertAlmostEqual(total_costs, -11.07 * ac.depreciation_rate)

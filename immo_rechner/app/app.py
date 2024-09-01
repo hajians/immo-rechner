@@ -1,6 +1,7 @@
 import os.path
 from typing import Iterable
 
+import click
 import numpy as np
 import plotly.graph_objects as go
 from dash import Dash, html, dcc, callback, Output, Input
@@ -87,9 +88,9 @@ def get_app():
                 depreciation_rate=depreciation_precentage / 100,
                 purchase_price=purchase_price,
             )
-            df = ProfitCalculator.from_raw_data(**input_parameters.dict()).simulate(
-                n_years=num_years, to_pandas=True
-            )
+            df = ProfitCalculator.from_raw_data(
+                **input_parameters.model_dump()
+            ).simulate(n_years=num_years, to_pandas=True)
             fig.add_trace(
                 go.Scatter(
                     x=df.year,
@@ -123,6 +124,14 @@ def get_app():
     return app
 
 
-if __name__ == "__main__":
+@click.command()
+@click.option("--debug-mode", default=False, is_flag=True)
+@click.option("--host", default="127.0.0.1", type=str)
+@click.option("--port", default="8050", type=str)
+def main(debug_mode, host, port):
     app = get_app()
-    app.run(debug=True)
+    app.run(debug=debug_mode, host=host, port=port)
+
+
+if __name__ == "__main__":
+    main()
