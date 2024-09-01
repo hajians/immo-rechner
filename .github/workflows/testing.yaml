@@ -22,4 +22,4 @@ jobs:
           poetry install --all-extras
       - name: Run tests
         run: |
-          poetry run pytest
+          poetry run pytest -vv
