@@ -78,12 +78,41 @@ def get_cost_table():
                 children=[
                     html.Td("Loan repayment range"),
                     html.Td(
-                        dcc.RangeSlider(
-                            min=500,
-                            max=3000,
-                            step=500,
-                            value=[500, 1500],
-                            id="repayment-range",
+                        html.Div(
+                            className="w3-container w3-col",
+                            children=[
+                                html.Div(
+                                    className="w3-container w3-row-padding",
+                                    children=[
+                                        dcc.Input(
+                                            1500,
+                                            min=0,
+                                            step=1,
+                                            id="repayment-value",
+                                            type="number",
+                                            className="w3-half",
+                                        ),
+                                        dcc.Checklist(
+                                            options=["Use Range"],
+                                            value=[],
+                                            id="use-repayment-range",
+                                            className="w3-half",
+                                        ),
+                                    ],
+                                ),
+                                html.Div(
+                                    className="w3-container w3-row w3-padding-16",
+                                    children=[
+                                        dcc.RangeSlider(
+                                            min=500,
+                                            max=3000,
+                                            step=500,
+                                            value=[500, 1500],
+                                            id="repayment-range",
+                                        )
+                                    ],
+                                ),
+                            ],
                         ),
                         colSpan=3,
                     ),

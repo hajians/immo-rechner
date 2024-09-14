@@ -47,6 +47,17 @@ def get_app():
     ]
 
     @callback(
+        Output("repayment-value", "disabled"),
+        Output("repayment-range", "disabled"),
+        Input("use-repayment-range", "value"),
+    )
+    def disable_repayment_range_or_value(repayment_value):
+        if repayment_value:
+            return True, False
+        else:
+            return False, True
+
+    @callback(
         Output("graph-cashflow", "figure"),
         Input("repayment-range", "value"),
         Input("yearly-income", "value"),
@@ -58,6 +69,8 @@ def get_app():
         Input("facility-costs-owner-share", "value"),
         Input("purchase-price", "value"),
         Input("depreciation-rate", "value"),
+        Input("use-repayment-range", "value"),
+        Input("repayment-value", "value"),
     )
     def update_graph(
         repayment_range,
@@ -70,10 +83,16 @@ def get_app():
         facility_costs_owner_share,
         purchase_price,
         depreciation_precentage,
+        use_repayment_range,
+        repayment_value,
     ):
         fig = make_subplots(rows=2, cols=1)
 
-        repayments = np.arange(*repayment_range, 500)
+        if use_repayment_range:
+            repayments = np.arange(*repayment_range, 500)
+        else:
+            repayments = np.array([repayment_value])
+
         color_maps = get_color_map(repayments)
 
         for repayment in repayments:
