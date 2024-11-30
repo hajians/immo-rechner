@@ -10,6 +10,7 @@ from immo_rechner.core.cost import (
     PurchaseSideCost,
 )
 from immo_rechner.core.revenue import RentIncome
+from immo_rechner.core.tax_contexts import UsageContext
 from immo_rechner.core.utils import get_logger
 from pydantic import BaseModel, computed_field
 
@@ -30,6 +31,7 @@ class YearlySummary(BaseModel):
 
 
 class InputParameters(BaseModel):
+    usage: UsageContext
     yearly_income: float
     monthly_rent: float
     facility_monthly_cost: float
@@ -123,6 +125,7 @@ class ProfitCalculator:
     @classmethod
     def from_raw_data(
         cls,
+        usage: UsageContext,
         yearly_income: float,
         monthly_rent: float,
         facility_monthly_cost: float,
@@ -141,19 +144,22 @@ class ProfitCalculator:
         positions = [
             RentIncome(monthly_rent=monthly_rent),
             BuildingMaintenance(
-                owner_share=owner_share, monthly_cost=facility_monthly_cost
+                usage=usage, owner_share=owner_share, monthly_cost=facility_monthly_cost
             ),
             InterestRate(
+                usage=usage,
                 yearly_rate=yearly_interest_rate,
                 repayment_amount=repayment_amount,
                 initial_debt=initial_debt,
             ),
             PurchaseCost(
+                usage=usage,
                 purchase_price=purchase_price,
                 land_value=land_value,
                 depreciation_rate=depreciation_rate,
             ),
             PurchaseSideCost(
+                usage=usage,
                 purchase_price=purchase_price,
                 land_value=land_value,
                 approximate_land_value=approximate_land_value,

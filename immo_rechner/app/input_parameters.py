@@ -173,5 +173,16 @@ def get_additional_params():
                     ),
                 ],
             ),
+            html.Tr(
+                children=[
+                    html.Td(
+                        dcc.Checklist(
+                            options=["Apartment for own usage"],
+                            value=[],
+                            id="apt-own-usage",
+                        ),
+                    )
+                ]
+            )
         ],
     )

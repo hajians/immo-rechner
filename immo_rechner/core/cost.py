@@ -2,11 +2,11 @@ from abc import ABC
 from typing import Optional
 
 from immo_rechner.core.abstract_position import AbstractPosition
+from immo_rechner.core.tax_contexts import RentingVsOwnUsageTaxContext, UsageContext
 
 N_MONTHS = 12
 
-
-class BuildingMaintenance(AbstractPosition):
+class BuildingMaintenance(RentingVsOwnUsageTaxContext, AbstractPosition):
     """
     BuildingMaintenance corresponds to Hausgeld.
     """
@@ -15,10 +15,13 @@ class BuildingMaintenance(AbstractPosition):
 
     def __init__(
         self,
+        usage: UsageContext,
         owner_share: float = 0.5,
         monthly_cost: Optional[float] = None,
         yearly_cost: Optional[float] = None,
     ):
+        RentingVsOwnUsageTaxContext.__init__(self, usage=usage)
+
         if (not monthly_cost) and (not yearly_cost):
             raise ValueError("Either monthly_cost or yearly_cost should be not None.")
 
@@ -29,7 +32,7 @@ class BuildingMaintenance(AbstractPosition):
         return -self.yearly_cost * self.owner_share
 
 
-class InterestRate(AbstractPosition):
+class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
     """
     Class for computing interest rate
     """
@@ -37,8 +40,10 @@ class InterestRate(AbstractPosition):
     is_cashflow = True
 
     def __init__(
-        self, yearly_rate: float, repayment_amount: float, initial_debt: float
+        self, usage: UsageContext, yearly_rate: float, repayment_amount: float, initial_debt: float
     ):
+        RentingVsOwnUsageTaxContext.__init__(self, usage=usage)
+
         self.yearly_rate = yearly_rate
         self.remaining_debt = initial_debt
         self.repayment_amount = repayment_amount
@@ -64,16 +69,19 @@ class InterestRate(AbstractPosition):
         return -total_costs
 
 
-class PurchaseCost(AbstractPosition, ABC):
+class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):
     is_cashflow = False
 
     def __init__(
         self,
+        usage: UsageContext,
         purchase_price: float,
         depreciation_rate: float,
         land_value: Optional[float] = None,
         approximate_land_value: bool = True,
     ):
+        RentingVsOwnUsageTaxContext.__init__(self, usage=usage)
+
         self.purchase_price = purchase_price
         if (land_value is None) and (not approximate_land_value):
             raise ValueError(f"land_value is None and approximate_land_value is False.")
@@ -92,6 +100,7 @@ class PurchaseSideCost(PurchaseCost):
 
     def __init__(
         self,
+        usage: UsageContext,
         purchase_price: float,
         depreciation_rate: float,
         land_value: Optional[float] = None,
@@ -101,6 +110,7 @@ class PurchaseSideCost(PurchaseCost):
         transfer_tax: float = 0.06,
     ):
         super().__init__(
+            usage=usage,
             purchase_price=purchase_price,
             land_value=land_value,
             approximate_land_value=approximate_land_value,
