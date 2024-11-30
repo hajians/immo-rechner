@@ -8,7 +8,12 @@ class TestCosts(TestCase):
 
     def test_interest_rate_evaluate(self):
         # Given
-        ir = InterestRate(usage=UsageContext.RENTING, yearly_rate=0.017, repayment_amount=84.10, initial_debt=1000)
+        ir = InterestRate(
+            usage=UsageContext.RENTING,
+            yearly_rate=0.017,
+            repayment_amount=84.10,
+            initial_debt=1000,
+        )
 
         # When
         total_cost = ir.evaluate()

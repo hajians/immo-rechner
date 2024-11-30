@@ -6,6 +6,7 @@ from immo_rechner.core.tax_contexts import RentingVsOwnUsageTaxContext, UsageCon
 
 N_MONTHS = 12
 
+
 class BuildingMaintenance(RentingVsOwnUsageTaxContext, AbstractPosition):
     """
     BuildingMaintenance corresponds to Hausgeld.
@@ -40,7 +41,11 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
     is_cashflow = True
 
     def __init__(
-        self, usage: UsageContext, yearly_rate: float, repayment_amount: float, initial_debt: float
+        self,
+        usage: UsageContext,
+        yearly_rate: float,
+        repayment_amount: float,
+        initial_debt: float,
     ):
         RentingVsOwnUsageTaxContext.__init__(self, usage=usage)
 
@@ -93,7 +98,9 @@ class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):
         self.depreciation_rate = depreciation_rate
 
     def evaluate(self, *args, **kwargs):
-        return self.apply_tax_context(-self.depreciation_rate * (self.purchase_price - self.land_value))
+        return self.apply_tax_context(
+            -self.depreciation_rate * (self.purchase_price - self.land_value)
+        )
 
 
 class PurchaseSideCost(PurchaseCost):
@@ -121,8 +128,10 @@ class PurchaseSideCost(PurchaseCost):
         self.transfer_tax = transfer_tax
 
     def evaluate(self, *args, **kwargs):
-        return self.apply_tax_context(-(
-            (self.makler + self.notar + self.transfer_tax)
-            * (self.purchase_price - self.land_value)
-            * self.depreciation_rate
-        ))
+        return self.apply_tax_context(
+            -(
+                (self.makler + self.notar + self.transfer_tax)
+                * (self.purchase_price - self.land_value)
+                * self.depreciation_rate
+            )
+        )

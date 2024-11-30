@@ -183,6 +183,6 @@ def get_additional_params():
                         ),
                     )
                 ]
-            )
+            ),
         ],
     )
