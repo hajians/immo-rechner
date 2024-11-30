@@ -25,7 +25,7 @@ def get_income_table():
                     html.Td("Monthly rent "),
                     html.Td(
                         dcc.Input(
-                            id="monthly-rent", value=1500, type="number", min=1, step=1
+                            id="monthly-rent", value=1500, type="number", min=0, step=1
                         )
                     ),
                 ]

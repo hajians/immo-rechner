@@ -1,10 +1,9 @@
 from immo_rechner.core.abstract_position import AbstractPosition
-from immo_rechner.core.tax_contexts import AlwaysAccountedTaxContext
 
 N_MONTHS = 12
 
 
-class RentIncome(AlwaysAccountedTaxContext, AbstractPosition):
+class RentIncome(AbstractPosition):
     is_cashflow = True
 
     def __init__(self, monthly_rent: float):
