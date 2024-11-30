@@ -14,6 +14,7 @@ from immo_rechner.app.input_parameters import (
     get_additional_params,
 )
 from immo_rechner.core.profit_calculator import ProfitCalculator, InputParameters
+from immo_rechner.core.tax_contexts import UsageContext
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSET_PATH = os.path.join(FILE_DIR, "assets")
@@ -71,6 +72,7 @@ def get_app():
         Input("depreciation-rate", "value"),
         Input("use-repayment-range", "value"),
         Input("repayment-value", "value"),
+        Input("apt-own-usage", "value"),
     )
     def update_graph(
         repayment_range,
@@ -85,8 +87,12 @@ def get_app():
         depreciation_precentage,
         use_repayment_range,
         repayment_value,
+        apt_own_usage,
     ):
         fig = make_subplots(rows=2, cols=1)
+
+        usage = UsageContext.OWN_USE if apt_own_usage else UsageContext.RENTING
+        print(usage)
 
         if use_repayment_range:
             repayments = np.arange(*repayment_range, 500)
@@ -97,6 +103,7 @@ def get_app():
 
         for repayment in repayments:
             input_parameters = InputParameters(
+                usage=usage,
                 yearly_income=yearly_income,
                 monthly_rent=month_rent,
                 facility_monthly_cost=facility_costs,
