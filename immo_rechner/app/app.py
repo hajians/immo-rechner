@@ -24,6 +24,7 @@ CSS_PATHS = [os.path.join(ASSET_PATH, "css", filename) for filename in ["w3.css"
 
 logger = get_logger("app")
 
+
 def get_color_map(names: Iterable):
     return {n: c for n, c in zip(names, express.colors.qualitative.Alphabet)}
 
@@ -59,7 +60,6 @@ def get_app():
             return True, False
         else:
             return False, True
-
 
     @callback(
         Output("monthly-rent", "disabled"),

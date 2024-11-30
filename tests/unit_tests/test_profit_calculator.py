@@ -138,7 +138,7 @@ class TestProfitCalculator(TestCase):
                 ),
             ),
             (
-                "own_usage", # Tax should be equal to zero since it is own use.
+                "own_usage",  # Tax should be equal to zero since it is own use.
                 get_positions(
                     usage=UsageContext.OWN_USE,
                     monthly_rent=0.0,
