@@ -1,6 +1,6 @@
 services:
   app:
     build: .
-    image: shajian/immo-rechner:0.1.0
+    image: shajian/immo-rechner:0.1.1
     ports:
       - "8050:8050"
