@@ -15,12 +15,14 @@ from immo_rechner.app.input_parameters import (
 )
 from immo_rechner.core.profit_calculator import ProfitCalculator, InputParameters
 from immo_rechner.core.tax_contexts import UsageContext
+from immo_rechner.core.utils import get_logger
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSET_PATH = os.path.join(FILE_DIR, "assets")
 
 CSS_PATHS = [os.path.join(ASSET_PATH, "css", filename) for filename in ["w3.css"]]
 
+logger = get_logger("app")
 
 def get_color_map(names: Iterable):
     return {n: c for n, c in zip(names, express.colors.qualitative.Alphabet)}
@@ -58,6 +60,18 @@ def get_app():
         else:
             return False, True
 
+
+    @callback(
+        Output("monthly-rent", "disabled"),
+        Output("monthly-rent", "value"),
+        Input("apt-own-usage", "value"),
+    )
+    def disable_monthly_rent(apt_own_usage):
+        if apt_own_usage:
+            return True, 0
+        else:
+            return False, 1500
+
     @callback(
         Output("graph-cashflow", "figure"),
         Input("repayment-range", "value"),
@@ -92,7 +106,7 @@ def get_app():
         fig = make_subplots(rows=2, cols=1)
 
         usage = UsageContext.OWN_USE if apt_own_usage else UsageContext.RENTING
-        print(usage)
+        logger.info(f"Using Tax context {usage}")
 
         if use_repayment_range:
             repayments = np.arange(*repayment_range, 500)

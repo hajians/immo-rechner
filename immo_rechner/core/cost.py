@@ -29,7 +29,7 @@ class BuildingMaintenance(RentingVsOwnUsageTaxContext, AbstractPosition):
         self.owner_share = owner_share
 
     def evaluate(self, *args, **kwargs):
-        return -self.yearly_cost * self.owner_share
+        return self.apply_tax_context(-self.yearly_cost * self.owner_share)
 
 
 class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
@@ -66,7 +66,7 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
         for _ in range(N_MONTHS):
             total_costs += self.pay_interest_per_month()
 
-        return -total_costs
+        return self.apply_tax_context(-total_costs)
 
 
 class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):
@@ -93,7 +93,7 @@ class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):
         self.depreciation_rate = depreciation_rate
 
     def evaluate(self, *args, **kwargs):
-        return -self.depreciation_rate * (self.purchase_price - self.land_value)
+        return self.apply_tax_context(-self.depreciation_rate * (self.purchase_price - self.land_value))
 
 
 class PurchaseSideCost(PurchaseCost):
@@ -121,8 +121,8 @@ class PurchaseSideCost(PurchaseCost):
         self.transfer_tax = transfer_tax
 
     def evaluate(self, *args, **kwargs):
-        return -(
+        return self.apply_tax_context(-(
             (self.makler + self.notar + self.transfer_tax)
             * (self.purchase_price - self.land_value)
             * self.depreciation_rate
-        )
+        ))
