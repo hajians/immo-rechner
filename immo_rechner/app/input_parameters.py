@@ -1,5 +1,7 @@
 from dash import html, dcc
 
+from immo_rechner.core.tax_contexts import UsageContext
+
 
 def get_income_table():
     return html.Table(
@@ -25,7 +27,7 @@ def get_income_table():
                     html.Td("Monthly rent "),
                     html.Td(
                         dcc.Input(
-                            id="monthly-rent", value=1500, type="number", min=1, step=1
+                            id="monthly-rent", value=1500, type="number", min=0, step=1
                         )
                     ),
                 ]
@@ -172,6 +174,21 @@ def get_additional_params():
                         )
                     ),
                 ],
+            ),
+            html.Tr(
+                children=[
+                    html.Td(
+                        dcc.Dropdown(
+                            options=[
+                                UsageContext.OWN_USE.value,
+                                UsageContext.RENTING.value,
+                            ],
+                            value=UsageContext.RENTING.value,
+                            clearable=False,
+                            id="apt-own-usage",
+                        ),
+                    )
+                ]
             ),
         ],
     )

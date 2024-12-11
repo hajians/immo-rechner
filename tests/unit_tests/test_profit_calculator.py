@@ -5,9 +5,11 @@ from parameterized import parameterized
 from immo_rechner.core.cost import PurchaseCost, BuildingMaintenance, InterestRate
 from immo_rechner.core.profit_calculator import ProfitCalculator, YearlySummary
 from immo_rechner.core.revenue import RentIncome
+from immo_rechner.core.tax_contexts import UsageContext
 
 
 def get_positions(
+    usage=UsageContext.RENTING,
     monthly_rent=500.0,
     owner_share=0.5,
     facility_monthly_cost=200.0,
@@ -20,14 +22,16 @@ def get_positions(
     return [
         RentIncome(monthly_rent=monthly_rent),
         BuildingMaintenance(
-            owner_share=owner_share, monthly_cost=facility_monthly_cost
+            usage=usage, owner_share=owner_share, monthly_cost=facility_monthly_cost
         ),
         InterestRate(
+            usage=usage,
             yearly_rate=yearly_interest_rate,
             repayment_amount=repayment_amount,
             initial_debt=initial_debt,
         ),
         PurchaseCost(
+            usage=usage,
             purchase_price=purchase_price,
             approximate_land_value=True,
             depreciation_rate=depreciation_rate,
@@ -40,6 +44,7 @@ class TestProfitCalculator(TestCase):
     @staticmethod
     def get_profit_calculator():
         return ProfitCalculator.from_raw_data(
+            usage=UsageContext.RENTING,
             yearly_income=100_000,
             monthly_rent=416.6666,
             facility_monthly_cost=200.0,
@@ -131,6 +136,14 @@ class TestProfitCalculator(TestCase):
                 YearlySummary(
                     profit_before_taxes=-1600.0, income_tax=-320.0, cashflow=320.0
                 ),
+            ),
+            (
+                "own_usage",  # Tax should be equal to zero since it is own use.
+                get_positions(
+                    usage=UsageContext.OWN_USE,
+                    monthly_rent=0.0,
+                ),
+                YearlySummary(profit_before_taxes=0.0, income_tax=0.0, cashflow=0.0),
             ),
         ]
     )

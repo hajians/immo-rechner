@@ -1,13 +1,19 @@
 from unittest import TestCase
 
 from immo_rechner.core.cost import InterestRate, PurchaseSideCost
+from immo_rechner.core.tax_contexts import UsageContext
 
 
 class TestCosts(TestCase):
 
     def test_interest_rate_evaluate(self):
         # Given
-        ir = InterestRate(yearly_rate=0.017, repayment_amount=84.10, initial_debt=1000)
+        ir = InterestRate(
+            usage=UsageContext.RENTING,
+            yearly_rate=0.017,
+            repayment_amount=84.10,
+            initial_debt=1000,
+        )
 
         # When
         total_cost = ir.evaluate()
@@ -19,6 +25,7 @@ class TestCosts(TestCase):
     def test_evaluate_accusation_costs(self):
         # Given
         ac = PurchaseSideCost(
+            usage=UsageContext.RENTING,
             purchase_price=100.0,
             land_value=0.0,
             approximate_land_value=False,
