@@ -105,7 +105,7 @@ def get_app():
     ):
         fig = make_subplots(rows=2, cols=1)
 
-        usage = UsageContext.OWN_USE if apt_own_usage else UsageContext.RENTING
+        usage = UsageContext(apt_own_usage)
         logger.info(f"Using Tax context {usage}")
 
         if use_repayment_range:
