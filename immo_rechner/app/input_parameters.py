@@ -1,5 +1,7 @@
 from dash import html, dcc
 
+from immo_rechner.core.tax_contexts import UsageContext
+
 
 def get_income_table():
     return html.Table(
@@ -176,9 +178,13 @@ def get_additional_params():
             html.Tr(
                 children=[
                     html.Td(
-                        dcc.Checklist(
-                            options=["Apartment for own usage"],
-                            value=[],
+                        dcc.Dropdown(
+                            options=[
+                                UsageContext.OWN_USE.value,
+                                UsageContext.RENTING.value,
+                            ],
+                            value=UsageContext.RENTING.value,
+                            clearable=False,
                             id="apt-own-usage",
                         ),
                     )
