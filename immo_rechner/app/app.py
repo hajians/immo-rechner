@@ -67,10 +67,23 @@ def get_app():
         Input("apt-own-usage", "value"),
     )
     def disable_monthly_rent(apt_own_usage):
-        if apt_own_usage:
+        if UsageContext(apt_own_usage) == UsageContext.OWN_USE:
             return True, 0
-        else:
+        elif UsageContext(apt_own_usage) == UsageContext.RENTING:
             return False, 1500
+        else:
+            raise ValueError(f"Usage not defined: {apt_own_usage}")
+
+    @callback(
+        Output("initial-debt", "disabled"),
+        Output("own-capital", "disabled"),
+        Input("own-capital-box", "value"),
+    )
+    def use_own_capital(use_own_capital):
+        if use_own_capital:
+            return True, False
+        else:
+            return False, True
 
     @callback(
         Output("graph-cashflow", "figure"),
@@ -87,6 +100,8 @@ def get_app():
         Input("use-repayment-range", "value"),
         Input("repayment-value", "value"),
         Input("apt-own-usage", "value"),
+        Input("own-capital-box", "value"),
+        Input("own-capital", "value"),
     )
     def update_graph(
         repayment_range,
@@ -102,8 +117,10 @@ def get_app():
         use_repayment_range,
         repayment_value,
         apt_own_usage,
+        own_capital_box,
+        own_capital,
     ):
-        fig = make_subplots(rows=2, cols=1)
+        fig = make_subplots(rows=2, cols=2, shared_xaxes=True)
 
         usage = UsageContext(apt_own_usage)
         logger.info(f"Using Tax context {usage}")
@@ -153,10 +170,21 @@ def get_app():
                 row=2,
                 col=1,
             )
+            fig.add_trace(
+                go.Scatter(
+                    x=df.year,
+                    y=df.remaining_debt,
+                    marker=dict(color=color_maps[repayment]),
+                    showlegend=False,
+                ),
+                row=1,
+                col=2,
+            )
 
         fig.update_layout(
             xaxis2_title=dict(text="Year"),
-            yaxis2_title=dict(text="Tax benefit (EUR)"),
+            yaxis3_title=dict(text="Tax benefit (EUR)"),
+            yaxis2_title=dict(text="Remaining debt (EUR)"),
         )
 
         return fig
