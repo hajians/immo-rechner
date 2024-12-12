@@ -3,7 +3,7 @@ import unittest
 from immo_rechner.app.app import get_app
 
 
-class TestAppHealthCheck(unittest.TestCase):
+class TestApp(unittest.TestCase):
 
     def setUp(self):
         # Create a test client for the Flask server
