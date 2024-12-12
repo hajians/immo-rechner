@@ -1,9 +1,9 @@
 from typing import Iterable
-from plotly import express
 
 import numpy as np
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from plotly import express
+from plotly.subplots import make_subplots
 
 from immo_rechner.core.profit_calculator import InputParameters, ProfitCalculator
 from immo_rechner.core.tax_contexts import UsageContext
@@ -81,7 +81,7 @@ def update_graph(
             depreciation_rate=depreciation_precentage / 100,
             purchase_price=purchase_price,
         )
-        df = ProfitCalculator.from_raw_data(**input_parameters.model_dump()).simulate(
+        df = ProfitCalculator.from_input_params(input_parameters).simulate(
             n_years=num_years, to_pandas=True
         )
         fig.add_trace(

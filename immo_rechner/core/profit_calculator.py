@@ -40,6 +40,7 @@ class InputParameters(BaseModel):
     repayment_amount: float
     initial_debt: float
     purchase_price: float
+    own_capital: Optional[float] = None
     land_value: Optional[float] = None
     approximate_land_value: bool = True
     depreciation_rate: float = 0.02
@@ -123,51 +124,36 @@ class ProfitCalculator:
         return output
 
     @classmethod
-    def from_raw_data(
-        cls,
-        usage: UsageContext,
-        yearly_income: float,
-        monthly_rent: float,
-        facility_monthly_cost: float,
-        owner_share: float,
-        yearly_interest_rate: float,
-        repayment_amount: float,
-        initial_debt: float,
-        purchase_price: float,
-        land_value: Optional[float] = None,
-        approximate_land_value: bool = True,
-        depreciation_rate: float = 0.02,
-        makler: float = 0.0357,
-        notar: float = 0.015,
-        transfer_tax: float = 0.06,
-    ):
+    def from_input_params(cls, params: InputParameters):
         positions = [
-            RentIncome(monthly_rent=monthly_rent),
+            RentIncome(monthly_rent=params.monthly_rent),
             BuildingMaintenance(
-                usage=usage, owner_share=owner_share, monthly_cost=facility_monthly_cost
+                usage=params.usage,
+                owner_share=params.owner_share,
+                monthly_cost=params.facility_monthly_cost,
             ),
             InterestRate(
-                usage=usage,
-                yearly_rate=yearly_interest_rate,
-                repayment_amount=repayment_amount,
-                initial_debt=initial_debt,
+                usage=params.usage,
+                yearly_rate=params.yearly_interest_rate,
+                repayment_amount=params.repayment_amount,
+                initial_debt=params.initial_debt,
             ),
             PurchaseCost(
-                usage=usage,
-                purchase_price=purchase_price,
-                land_value=land_value,
-                depreciation_rate=depreciation_rate,
+                usage=params.usage,
+                purchase_price=params.purchase_price,
+                land_value=params.land_value,
+                depreciation_rate=params.depreciation_rate,
             ),
             PurchaseSideCost(
-                usage=usage,
-                purchase_price=purchase_price,
-                land_value=land_value,
-                approximate_land_value=approximate_land_value,
-                makler=makler,
-                notar=notar,
-                transfer_tax=transfer_tax,
-                depreciation_rate=depreciation_rate,
+                usage=params.usage,
+                purchase_price=params.purchase_price,
+                land_value=params.land_value,
+                approximate_land_value=params.approximate_land_value,
+                makler=params.makler,
+                notar=params.notar,
+                transfer_tax=params.transfer_tax,
+                depreciation_rate=params.depreciation_rate,
             ),
         ]
 
-        return cls(positions=positions, yearly_income=yearly_income)
+        return cls(positions=positions, yearly_income=params.yearly_income)
