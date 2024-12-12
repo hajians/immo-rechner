@@ -56,7 +56,7 @@ def update_graph(
     own_capital_box,
     own_capital,
 ):
-    fig = make_subplots(rows=2, cols=2, shared_xaxes=True)
+    fig = make_subplots(rows=2, cols=2)
 
     usage = UsageContext(apt_own_usage)
     logger.info(f"Using Tax context {usage}")
@@ -80,10 +80,11 @@ def update_graph(
             initial_debt=initial_debt,
             depreciation_rate=depreciation_precentage / 100,
             purchase_price=purchase_price,
+            own_capital=own_capital if own_capital_box else None,
         )
-        df = ProfitCalculator.from_input_params(input_parameters).simulate(
-            n_years=num_years, to_pandas=True
-        )
+
+        profit_calculater = ProfitCalculator.from_input_params(input_parameters)
+        df = profit_calculater.simulate(n_years=num_years, to_pandas=True)
         fig.add_trace(
             go.Scatter(
                 x=df.year,
@@ -117,10 +118,19 @@ def update_graph(
             col=2,
         )
 
+    fig.add_annotation(
+        text=f"Initial debt: {profit_calculater.initial_debt}",
+        row=1,
+        col=2,
+        showarrow=False,
+        x=0,
+        y=0,
+    )
+
     fig.update_layout(
         xaxis2_title=dict(text="Year"),
-        yaxis3_title=dict(text="Tax benefit (EUR)"),
         yaxis2_title=dict(text="Remaining debt (EUR)"),
+        yaxis3_title=dict(text="Tax benefit (EUR)"),
     )
 
     return fig
