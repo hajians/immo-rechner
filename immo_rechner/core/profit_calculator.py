@@ -1,6 +1,7 @@
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Optional, Union
 
 import pandas as pd
+from pydantic import BaseModel, computed_field
 
 from immo_rechner.core.abstract_position import AbstractPosition
 from immo_rechner.core.cost import (
@@ -12,7 +13,6 @@ from immo_rechner.core.cost import (
 from immo_rechner.core.revenue import RentIncome
 from immo_rechner.core.tax_contexts import UsageContext
 from immo_rechner.core.utils import get_logger
-from pydantic import BaseModel, computed_field
 
 logger = get_logger(__name__)
 
