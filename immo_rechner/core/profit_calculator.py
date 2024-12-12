@@ -65,6 +65,7 @@ class ProfitCalculator:
         self.yearly_income = yearly_income
 
         self.interest_rate_position = self.fetch_interest_rate_position(self.positions)
+        self.initial_debt = self.interest_rate_position.initial_debt
 
     @staticmethod
     def get_yearly_income_tax(taxable_income: float) -> float:
@@ -115,7 +116,7 @@ class ProfitCalculator:
         self, n_years: int, to_pandas: bool = False
     ) -> Union[List, pd.DataFrame]:
         output = []
-        for year in range(n_years):
+        for year in range(1, n_years + 1):
             output.append(dict(year=year, **self.yearly_simulation().model_dump()))
 
         if to_pandas:
@@ -124,7 +125,23 @@ class ProfitCalculator:
         return output
 
     @classmethod
-    def from_input_params(cls, params: InputParameters):
+    def from_input_params(cls, input_params: InputParameters):
+
+        params = input_params.model_copy()
+
+        if params.own_capital is not None:
+            logger.info(f"Ignoring initial_debt: {params.initial_debt}")
+            params.initial_debt = (
+                params.purchase_price
+                - params.own_capital
+                + PurchaseSideCost.compute_side_costs(
+                    makler=params.makler,
+                    notar=params.notar,
+                    transfer_tax=params.transfer_tax,
+                    purchase_price=params.purchase_price,
+                )
+            )
+
         positions = [
             RentIncome(monthly_rent=params.monthly_rent),
             BuildingMaintenance(
