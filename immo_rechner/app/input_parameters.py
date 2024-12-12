@@ -53,6 +53,23 @@ def get_cost_table():
             ),
             html.Tr(
                 children=[
+                    html.Td("Own capital (Eigenkapital)"),
+                    html.Td(
+                        dcc.Input(
+                            id="own-capital",
+                            value=100000,
+                            min=1,
+                            type="number",
+                            step=1,
+                        )
+                    ),
+                    dcc.Checklist(
+                        options=["Use own capital"], value=[], id="own-capital-box"
+                    ),
+                ]
+            ),
+            html.Tr(
+                children=[
                     html.Td("Initial loan amount"),
                     html.Td(
                         dcc.Input(
