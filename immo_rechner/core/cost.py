@@ -127,11 +127,18 @@ class PurchaseSideCost(PurchaseCost):
         self.notar = notar
         self.transfer_tax = transfer_tax
 
+    @staticmethod
+    def compute_side_costs(makler, notar, transfer_tax, purchase_price):
+        return (makler + notar + transfer_tax) * purchase_price
+
     def evaluate(self, *args, **kwargs):
         return self.apply_tax_context(
-            -(
-                (self.makler + self.notar + self.transfer_tax)
-                * (self.purchase_price - self.land_value)
-                * self.depreciation_rate
+            -self.compute_side_costs(
+                makler=self.makler,
+                notar=self.notar,
+                transfer_tax=self.transfer_tax,
+                purchase_price=self.purchase_price
+                - self.land_value,  # TODO: Is the subtraction correct?
             )
+            * self.depreciation_rate
         )
