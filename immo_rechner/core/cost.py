@@ -52,14 +52,22 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
         self.yearly_rate = yearly_rate
         self.remaining_debt = initial_debt
         self.repayment_amount = repayment_amount
+
+        # Mutable values
         self.initial_debt = initial_debt
+        self.total_interest_cost = 0.0
+        self.this_year_interest_cost = 0.0
+
         self.counter = 0
 
     def reset(self):
         self.remaining_debt = self.initial_debt
+        self.total_interest_cost = 0.0
+        self.this_year_interest_cost = 0.0
 
     def pay_interest_per_month(self):
         cost = (self.yearly_rate / N_MONTHS) * self.remaining_debt
+        self.total_interest_cost += cost
         self.remaining_debt -= self.repayment_amount - cost
 
         self.counter += 1
@@ -67,11 +75,12 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
         return cost
 
     def evaluate(self, *args, **kwargs):
-        total_costs = 0
-        for _ in range(N_MONTHS):
-            total_costs += self.pay_interest_per_month()
+        self.this_year_interest_cost = 0.0
 
-        return self.apply_tax_context(-total_costs)
+        for _ in range(N_MONTHS):
+            self.this_year_interest_cost += self.pay_interest_per_month()
+
+        return self.apply_tax_context(-self.this_year_interest_cost)
 
 
 class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):

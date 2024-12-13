@@ -22,7 +22,8 @@ class YearlySummary(BaseModel):
     profit_before_taxes: float
     income_tax: float
     remaining_debt: Optional[float] = None
-    interest_cost: Optional[float] = None
+    cumulative_interest_cost: Optional[float] = None
+    yearly_interest_cost: Optional[float] = None
 
     @computed_field
     @property
@@ -110,6 +111,8 @@ class ProfitCalculator:
             profit_before_taxes=profit_before_taxes,  # This includes depreciation.
             income_tax=income_tax_diff,
             remaining_debt=self.interest_rate_position.remaining_debt,
+            cumulative_interest_cost=self.interest_rate_position.total_interest_cost,
+            yearly_interest_cost=self.interest_rate_position.this_year_interest_cost,
         )
 
     def simulate(

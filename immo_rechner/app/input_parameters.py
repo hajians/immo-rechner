@@ -46,7 +46,7 @@ def get_cost_table():
                     html.Td("Purchase price"),
                     html.Td(
                         dcc.Input(
-                            500000, min=0, step=1, id="purchase-price", type="number"
+                            450_000, min=0, step=1, id="purchase-price", type="number"
                         )
                     ),
                 ]
@@ -83,7 +83,7 @@ def get_cost_table():
                     html.Td("Yearly interest rate (%)"),
                     html.Td(
                         dcc.Input(
-                            3.55,
+                            3.3,
                             min=0,
                             max=100,
                             step=0.01,
@@ -187,7 +187,7 @@ def get_additional_params():
                     html.Td("Number of years"),
                     html.Td(
                         dcc.Input(
-                            10, min=5, max=100, step=1, id="num-years", type="number"
+                            20, min=5, max=100, step=1, id="num-years", type="number"
                         )
                     ),
                 ],
