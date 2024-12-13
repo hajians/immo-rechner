@@ -134,12 +134,13 @@ def update_graph(
         row=1,
         col=2,
         showarrow=False,
-        x=0,
+        x=5,
         y=0,
     )
 
     fig.update_layout(
-        xaxis2_title=dict(text="Year"),
+        xaxis4_title=dict(text="Year"),
+        xaxis3_title=dict(text="Year"),
         yaxis2_title=dict(text="Remaining debt (EUR)"),
         yaxis3_title=dict(text="Tax benefit (EUR)"),
         yaxis4_title=dict(text="Yearly interest cost (EUR)"),
