@@ -118,6 +118,17 @@ def update_graph(
             col=2,
         )
 
+        fig.add_trace(
+            go.Scatter(
+                x=df.year,
+                y=df.yearly_interest_cost,
+                marker=dict(color=color_maps[repayment]),
+                showlegend=False,
+            ),
+            row=2,
+            col=2,
+        )
+
     fig.add_annotation(
         text=f"Initial debt: {profit_calculater.initial_debt}",
         row=1,
@@ -131,6 +142,7 @@ def update_graph(
         xaxis2_title=dict(text="Year"),
         yaxis2_title=dict(text="Remaining debt (EUR)"),
         yaxis3_title=dict(text="Tax benefit (EUR)"),
+        yaxis4_title=dict(text="Yearly interest cost (EUR)"),
     )
 
     return fig
