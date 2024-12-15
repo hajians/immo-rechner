@@ -173,6 +173,21 @@ def get_cost_table():
                     ),
                 ]
             ),
+            html.Tr(
+                children=[
+                    html.Td("Makler provision (%)"),
+                    html.Td(
+                        dcc.Input(
+                            3.57,
+                            min=0,
+                            max=5,
+                            step=0.01,
+                            id="makler-provision",
+                            type="number",
+                        )
+                    ),
+                ]
+            ),
         ],
     )
 
