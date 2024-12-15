@@ -55,6 +55,7 @@ def update_graph(
     apt_own_usage,
     own_capital_box,
     own_capital,
+    maker_provision,
 ):
     fig = make_subplots(rows=2, cols=2)
 
@@ -81,6 +82,7 @@ def update_graph(
             depreciation_rate=depreciation_precentage / 100,
             purchase_price=purchase_price,
             own_capital=own_capital if own_capital_box else None,
+            makler=maker_provision / 100,
         )
 
         profit_calculater = ProfitCalculator.from_input_params(input_parameters)
