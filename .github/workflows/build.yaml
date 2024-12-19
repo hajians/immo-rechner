@@ -32,17 +32,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-#    if:
-#      contains('
-#        refs/heads/main
-#      ', github.ref)
+    if:
+      contains('
+        refs/heads/main
+      ', github.ref)
     env:
       CI_COMMIT_MESSAGE: Continuous Integration Build Artifacts
       CI_COMMIT_AUTHOR: Continuous Integration
     steps:
     - uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.pull_request.head.ref }}
+        ref: ${{ github.ref_name }}
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
