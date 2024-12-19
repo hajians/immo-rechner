@@ -1,6 +1,7 @@
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Optional, Union
 
 import pandas as pd
+from pydantic import BaseModel, computed_field
 
 from immo_rechner.core.abstract_position import AbstractPosition
 from immo_rechner.core.cost import (
@@ -12,7 +13,6 @@ from immo_rechner.core.cost import (
 from immo_rechner.core.revenue import RentIncome
 from immo_rechner.core.tax_contexts import UsageContext
 from immo_rechner.core.utils import get_logger
-from pydantic import BaseModel, computed_field
 
 logger = get_logger(__name__)
 
@@ -22,7 +22,8 @@ class YearlySummary(BaseModel):
     profit_before_taxes: float
     income_tax: float
     remaining_debt: Optional[float] = None
-    interest_cost: Optional[float] = None
+    cumulative_interest_cost: Optional[float] = None
+    yearly_interest_cost: Optional[float] = None
 
     @computed_field
     @property
@@ -40,6 +41,7 @@ class InputParameters(BaseModel):
     repayment_amount: float
     initial_debt: float
     purchase_price: float
+    own_capital: Optional[float] = None
     land_value: Optional[float] = None
     approximate_land_value: bool = True
     depreciation_rate: float = 0.02
@@ -64,6 +66,7 @@ class ProfitCalculator:
         self.yearly_income = yearly_income
 
         self.interest_rate_position = self.fetch_interest_rate_position(self.positions)
+        self.initial_debt = self.interest_rate_position.initial_debt
 
     @staticmethod
     def get_yearly_income_tax(taxable_income: float) -> float:
@@ -108,13 +111,15 @@ class ProfitCalculator:
             profit_before_taxes=profit_before_taxes,  # This includes depreciation.
             income_tax=income_tax_diff,
             remaining_debt=self.interest_rate_position.remaining_debt,
+            cumulative_interest_cost=self.interest_rate_position.total_interest_cost,
+            yearly_interest_cost=self.interest_rate_position.this_year_interest_cost,
         )
 
     def simulate(
         self, n_years: int, to_pandas: bool = False
     ) -> Union[List, pd.DataFrame]:
         output = []
-        for year in range(n_years):
+        for year in range(1, n_years + 1):
             output.append(dict(year=year, **self.yearly_simulation().model_dump()))
 
         if to_pandas:
@@ -123,51 +128,52 @@ class ProfitCalculator:
         return output
 
     @classmethod
-    def from_raw_data(
-        cls,
-        usage: UsageContext,
-        yearly_income: float,
-        monthly_rent: float,
-        facility_monthly_cost: float,
-        owner_share: float,
-        yearly_interest_rate: float,
-        repayment_amount: float,
-        initial_debt: float,
-        purchase_price: float,
-        land_value: Optional[float] = None,
-        approximate_land_value: bool = True,
-        depreciation_rate: float = 0.02,
-        makler: float = 0.0357,
-        notar: float = 0.015,
-        transfer_tax: float = 0.06,
-    ):
+    def from_input_params(cls, input_params: InputParameters):
+
+        params = input_params.model_copy()
+
+        if params.own_capital is not None:
+            logger.info(f"Ignoring initial_debt: {params.initial_debt}")
+            params.initial_debt = (
+                params.purchase_price
+                - params.own_capital
+                + PurchaseSideCost.compute_side_costs(
+                    makler=params.makler,
+                    notar=params.notar,
+                    transfer_tax=params.transfer_tax,
+                    purchase_price=params.purchase_price,
+                )
+            )
+
         positions = [
-            RentIncome(monthly_rent=monthly_rent),
+            RentIncome(monthly_rent=params.monthly_rent),
             BuildingMaintenance(
-                usage=usage, owner_share=owner_share, monthly_cost=facility_monthly_cost
+                usage=params.usage,
+                owner_share=params.owner_share,
+                monthly_cost=params.facility_monthly_cost,
             ),
             InterestRate(
-                usage=usage,
-                yearly_rate=yearly_interest_rate,
-                repayment_amount=repayment_amount,
-                initial_debt=initial_debt,
+                usage=params.usage,
+                yearly_rate=params.yearly_interest_rate,
+                repayment_amount=params.repayment_amount,
+                initial_debt=params.initial_debt,
             ),
             PurchaseCost(
-                usage=usage,
-                purchase_price=purchase_price,
-                land_value=land_value,
-                depreciation_rate=depreciation_rate,
+                usage=params.usage,
+                purchase_price=params.purchase_price,
+                land_value=params.land_value,
+                depreciation_rate=params.depreciation_rate,
             ),
             PurchaseSideCost(
-                usage=usage,
-                purchase_price=purchase_price,
-                land_value=land_value,
-                approximate_land_value=approximate_land_value,
-                makler=makler,
-                notar=notar,
-                transfer_tax=transfer_tax,
-                depreciation_rate=depreciation_rate,
+                usage=params.usage,
+                purchase_price=params.purchase_price,
+                land_value=params.land_value,
+                approximate_land_value=params.approximate_land_value,
+                makler=params.makler,
+                notar=params.notar,
+                transfer_tax=params.transfer_tax,
+                depreciation_rate=params.depreciation_rate,
             ),
         ]
 
-        return cls(positions=positions, yearly_income=yearly_income)
+        return cls(positions=positions, yearly_income=params.yearly_income)

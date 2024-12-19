@@ -16,7 +16,7 @@ poetry run pytest
 ## Running in debug mode
 After installing the requirements you can run the application in debug mode using
 ```bash
-poetry run app --debug-mode --port 8050 # Chose your own port.
+poetry run app --debug-mode --port 8050 # Choose your own port.
 ```
 Then the application is available under `http://localhost:8050`.
 

@@ -85,6 +85,7 @@ def get_app():
         Input("apt-own-usage", "value"),
         Input("own-capital-box", "value"),
         Input("own-capital", "value"),
+        Input("makler-provision", "value"),
     )(update_graph)
 
     app.server.add_url_rule("/health", "health_check", health_check, methods=["GET"])
