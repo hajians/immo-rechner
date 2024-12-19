@@ -1,5 +1,6 @@
 # Property Optimizer
 This repository is for simulating cash-flows of a property given few parameters.
+![Screenshot of the tool|40%](./docs/figs/shot.png)
 
 # Development
 ## Requirments
