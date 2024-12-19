@@ -3,6 +3,9 @@ name: 'Build, run pytest and takes a screenshot of the service'
 on:
   pull_request:
     branches: [ main ]
+  push:
+    branches:
+      - main
 
 jobs:
   build:
