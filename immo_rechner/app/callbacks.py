@@ -1,9 +1,9 @@
 from typing import Iterable
-from plotly import express
 
 import numpy as np
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from plotly import express
+from plotly.subplots import make_subplots
 
 from immo_rechner.core.profit_calculator import InputParameters, ProfitCalculator
 from immo_rechner.core.tax_contexts import UsageContext
@@ -55,8 +55,9 @@ def update_graph(
     apt_own_usage,
     own_capital_box,
     own_capital,
+    maker_provision,
 ):
-    fig = make_subplots(rows=2, cols=2, shared_xaxes=True)
+    fig = make_subplots(rows=2, cols=2)
 
     usage = UsageContext(apt_own_usage)
     logger.info(f"Using Tax context {usage}")
@@ -80,10 +81,12 @@ def update_graph(
             initial_debt=initial_debt,
             depreciation_rate=depreciation_precentage / 100,
             purchase_price=purchase_price,
+            own_capital=own_capital if own_capital_box else None,
+            makler=maker_provision / 100,
         )
-        df = ProfitCalculator.from_raw_data(**input_parameters.model_dump()).simulate(
-            n_years=num_years, to_pandas=True
-        )
+
+        profit_calculater = ProfitCalculator.from_input_params(input_parameters)
+        df = profit_calculater.simulate(n_years=num_years, to_pandas=True)
         fig.add_trace(
             go.Scatter(
                 x=df.year,
@@ -117,10 +120,32 @@ def update_graph(
             col=2,
         )
 
+        fig.add_trace(
+            go.Scatter(
+                x=df.year,
+                y=df.yearly_interest_cost,
+                marker=dict(color=color_maps[repayment]),
+                showlegend=False,
+            ),
+            row=2,
+            col=2,
+        )
+
+    fig.add_annotation(
+        text=f"Initial debt: {profit_calculater.initial_debt}",
+        row=1,
+        col=2,
+        showarrow=False,
+        x=5,
+        y=0,
+    )
+
     fig.update_layout(
-        xaxis2_title=dict(text="Year"),
-        yaxis3_title=dict(text="Tax benefit (EUR)"),
+        xaxis4_title=dict(text="Year"),
+        xaxis3_title=dict(text="Year"),
         yaxis2_title=dict(text="Remaining debt (EUR)"),
+        yaxis3_title=dict(text="Tax benefit (EUR)"),
+        yaxis4_title=dict(text="Yearly interest cost (EUR)"),
     )
 
     return fig

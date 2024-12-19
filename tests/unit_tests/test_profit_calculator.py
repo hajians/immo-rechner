@@ -3,7 +3,11 @@ from unittest import TestCase, mock
 from parameterized import parameterized
 
 from immo_rechner.core.cost import PurchaseCost, BuildingMaintenance, InterestRate
-from immo_rechner.core.profit_calculator import ProfitCalculator, YearlySummary
+from immo_rechner.core.profit_calculator import (
+    ProfitCalculator,
+    YearlySummary,
+    InputParameters,
+)
 from immo_rechner.core.revenue import RentIncome
 from immo_rechner.core.tax_contexts import UsageContext
 
@@ -43,17 +47,19 @@ class TestProfitCalculator(TestCase):
 
     @staticmethod
     def get_profit_calculator():
-        return ProfitCalculator.from_raw_data(
-            usage=UsageContext.RENTING,
-            yearly_income=100_000,
-            monthly_rent=416.6666,
-            facility_monthly_cost=200.0,
-            owner_share=0.0,
-            repayment_amount=416.6666,
-            yearly_interest_rate=0.05,
-            initial_debt=100_000,
-            depreciation_rate=0.01,
-            purchase_price=200_000,
+        return ProfitCalculator.from_input_params(
+            InputParameters(
+                usage=UsageContext.RENTING,
+                yearly_income=100_000,
+                monthly_rent=416.6666,
+                facility_monthly_cost=200.0,
+                owner_share=0.0,
+                repayment_amount=416.6666,
+                yearly_interest_rate=0.05,
+                initial_debt=100_000,
+                depreciation_rate=0.01,
+                purchase_price=200_000,
+            )
         )
 
     def test_get_yearly_income_tax(self):
