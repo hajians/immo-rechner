@@ -93,6 +93,13 @@ def get_app():
     return app
 
 
+def get_server():
+    """
+    Returns flask app for gunicorn.
+    """
+    return get_app().server
+
+
 @click.command()
 @click.option("--debug-mode", default=False, is_flag=True)
 @click.option("--host", default="127.0.0.1", type=str)
