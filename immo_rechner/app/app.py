@@ -1,7 +1,9 @@
 import os.path
 
 import click
+import dash_auth
 from dash import Dash, html, dcc, Output, Input
+from dotenv import dotenv_values
 from flask import jsonify
 
 from immo_rechner.app.callbacks import (
@@ -90,6 +92,11 @@ def get_app():
 
     app.server.add_url_rule("/health", "health_check", health_check, methods=["GET"])
 
+    secrets = dotenv_values()
+
+    if secrets:
+        dash_auth.BasicAuth(app, secrets)
+
     return app
 
 
@@ -97,7 +104,9 @@ def get_server():
     """
     Returns flask app for gunicorn.
     """
-    return get_app().server
+
+    app = get_app()
+    return app.server
 
 
 @click.command()

@@ -355,6 +355,25 @@ diskcache = ["diskcache (>=5.2.1)", "multiprocess (>=0.70.12)", "psutil (>=5.8.0
 testing = ["beautifulsoup4 (>=4.8.2)", "cryptography", "dash-testing-stub (>=0.0.2)", "lxml (>=4.6.2)", "multiprocess (>=0.70.12)", "percy (>=2.0.2)", "psutil (>=5.8.0)", "pytest (>=6.0.2)", "requests[security] (>=2.21.0)", "selenium (>=3.141.0,<=4.2.0)", "waitress (>=1.4.4)"]
 
 [[package]]
+name = "dash-auth"
+version = "2.3.0"
+description = "Dash Authorization Package."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "dash_auth-2.3.0-py3-none-any.whl", hash = "sha256:2fa72d4ee128b4f9cf0c958157a986ffcd0b93d43b54d64e3cef5976ab7e0abe"},
+    {file = "dash_auth-2.3.0.tar.gz", hash = "sha256:72df43248c15e121f8d5d710981e880deb2df546b564f2951a10ca50d7d92f6d"},
+]
+
+[package.dependencies]
+dash = ">=1.1.1"
+flask = "*"
+werkzeug = "*"
+
+[package.extras]
+oidc = ["authlib"]
+
+[[package]]
 name = "dash-core-components"
 version = "2.0.0"
 description = "Core component suite for Dash"
@@ -1611,6 +1630,20 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-dotenv"
+version = "1.0.1"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"},
+    {file = "python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "pytz"
 version = "2025.1"
 description = "World timezone definitions, modern and historical"
@@ -1944,4 +1977,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "524933e9e89b3799ce7f10db07432775860946e1e0aa3ee5b09518b4738b02f3"
+content-hash = "ee154ef98db0e05b9ec274fd55892c6de1ef3ed209d7df50f8bdf20a18873426"
