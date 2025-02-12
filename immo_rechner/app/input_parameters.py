@@ -10,7 +10,7 @@ def get_income_table():
             html.Th("Revenues", colSpan=2, className="w3-teal"),
             html.Tr(
                 children=[
-                    html.Td("Yearly income"),
+                    html.Td("Yearly salary"),
                     html.Td(
                         dcc.Input(
                             id="yearly-income",

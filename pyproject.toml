@@ -3,6 +3,8 @@ name = "immo-rechner"
 version = "0.1.0"
 description = "A repository for evaluating profitability of an immobilien."
 authors = ["Soheil Hajian <soheil.hajian@outlook.com>"]
+license = "MIT License"
+packages = [{include = "immo_rechner"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -12,6 +14,7 @@ pandas = "^2.2.2"
 matplotlib = "^3.9.2"
 dash = "^2.17.1"
 click = "^8.1.7"
+gunicorn = "^23.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
