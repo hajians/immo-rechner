@@ -4,7 +4,7 @@ services:
     container_name: immo_rechner_app
     image: shajian/immo-rechner:0.1.1
     ports:
-      - "8050"
+      - "8008"
     depends_on:
       - nginx
 
@@ -14,4 +14,4 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d
     ports:
-      - "8001:8001"
+      - "8050:8050"

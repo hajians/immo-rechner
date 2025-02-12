@@ -14,4 +14,4 @@ COPY immo_rechner ./immo_rechner
 
 RUN poetry install --without dev && rm -rf $POETRY_CACHE_DIR
 
-ENTRYPOINT ["poetry", "run", "gunicorn", "-b", "0.0.0.0:8050", "-w", "4", "immo_rechner.app.app:get_server()"]
+ENTRYPOINT ["poetry", "run", "gunicorn", "-b", "0.0.0.0:8008", "-w", "4", "immo_rechner.app.app:get_server()"]
