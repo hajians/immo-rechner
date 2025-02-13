@@ -2,6 +2,8 @@ from dash import html, dcc
 
 from immo_rechner.core.tax_contexts import UsageContext
 
+import dash_bootstrap_components as dbc
+
 
 def get_income_table():
     return html.Table(
@@ -20,6 +22,10 @@ def get_income_table():
                             step=1,
                         ),
                     ),
+                    dbc.Tooltip(
+                        ["Enter your annual salary or total yearly earnings."],
+                        target="yearly-income",
+                    ),
                 ]
             ),
             html.Tr(
@@ -30,6 +36,7 @@ def get_income_table():
                             id="monthly-rent", value=1500, type="number", min=0, step=1
                         )
                     ),
+                    dbc.Tooltip("Rental amount from the flat.", target="monthly-rent"),
                 ]
             ),
         ],
@@ -49,6 +56,9 @@ def get_cost_table():
                             450_000, min=0, step=1, id="purchase-price", type="number"
                         )
                     ),
+                    dbc.Tooltip(
+                        "Enter the total cost of the property.", target="purchase-price"
+                    ),
                 ]
             ),
             html.Tr(
@@ -65,6 +75,10 @@ def get_cost_table():
                     ),
                     dcc.Checklist(
                         options=["Use own capital"], value=[], id="own-capital-box"
+                    ),
+                    dbc.Tooltip(
+                        "Check this box if you would like to compute using your own capital.",
+                        target="own-capital-box",
                     ),
                 ]
             ),
@@ -117,6 +131,10 @@ def get_cost_table():
                                             id="use-repayment-range",
                                             className="w3-half",
                                         ),
+                                        dbc.Tooltip(
+                                            "Set a fixed monthly repayment amount or use the slider to select a range.",
+                                            target="use-repayment-range",
+                                        ),
                                     ],
                                 ),
                                 html.Div(
@@ -156,6 +174,9 @@ def get_cost_table():
                             type="number",
                         )
                     ),
+                    dbc.Tooltip(
+                        "Enter the monthly maintenance fees.", target="facility-costs"
+                    ),
                 ]
             ),
             html.Tr(
@@ -170,6 +191,10 @@ def get_cost_table():
                             id="depreciation-rate",
                             type="number",
                         )
+                    ),
+                    dbc.Tooltip(
+                        "Enter the annual depreciation rate for tax deductions.",
+                        target="depreciation-rate",
                     ),
                 ]
             ),
