@@ -1,8 +1,11 @@
 import os.path
 
 import click
+import dash_auth
 from dash import Dash, html, dcc, Output, Input
+from dotenv import dotenv_values
 from flask import jsonify
+import dash_bootstrap_components as dbc
 
 from immo_rechner.app.callbacks import (
     disable_repayment_range_or_value,
@@ -20,7 +23,9 @@ from immo_rechner.core.utils import get_logger
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSET_PATH = os.path.join(FILE_DIR, "assets")
 
-CSS_PATHS = [os.path.join(ASSET_PATH, "css", filename) for filename in ["w3.css"]]
+CSS_PATHS = [os.path.join(ASSET_PATH, "css", filename) for filename in ["w3.css"]] + [
+    dbc.themes.BOOTSTRAP
+]
 
 logger = get_logger("app")
 
@@ -35,6 +40,20 @@ def get_app():
     app.layout = [
         html.H1(
             children="Immobilien Rechner", className="w3-container w3-2xlarge w3-center"
+        ),
+        html.P(
+            children=[
+                "This a web-based tool to "
+                "help users calculate property investment outcomes, "
+                "including mortgage payments, tax benefits, and cash flow projections. "
+                "The app is ideal for property buyers, investors, and real estate agents. ",
+                html.I("This tool is experimental, so use with care. "),
+                html.A(
+                    "Read this to understand how depreciation works in Germany.",
+                    href="https://hypofriend.de/en/depreciation-laws-real-estate-germany-2024.add",
+                ),
+            ],
+            className="w3-container w3-left w3-half w3-large",
         ),
         html.Table(
             className="w3-container w3-table w3-center",
@@ -90,6 +109,13 @@ def get_app():
 
     app.server.add_url_rule("/health", "health_check", health_check, methods=["GET"])
 
+    secrets = dotenv_values()
+
+    if secrets:
+        dash_auth.BasicAuth(app, secrets)
+    else:
+        logger.info("No authentication was provided.")
+
     return app
 
 
@@ -97,7 +123,9 @@ def get_server():
     """
     Returns flask app for gunicorn.
     """
-    return get_app().server
+
+    app = get_app()
+    return app.server
 
 
 @click.command()
