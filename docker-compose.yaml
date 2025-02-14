@@ -7,11 +7,14 @@ services:
       - "8008"
     depends_on:
       - nginx
+    volumes:
+      - ./.env:/immo-rechner/.env
 
   nginx:
     image: nginx
     container_name: nginx
     volumes:
       - ./nginx:/etc/nginx/conf.d
+      - ./cert:/etc/nginx/ssl
     ports:
       - "8050:8050"
