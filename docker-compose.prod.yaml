@@ -5,3 +5,4 @@ services:
       - /etc/ssl/cf:/etc/nginx/ssl
     ports:
       - "80:80"
+      - "443:443"
