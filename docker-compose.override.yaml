@@ -1,0 +1,6 @@
+services:
+  nginx:
+    volumes:
+      - ./nginx/dev:/etc/nginx/conf.d
+    ports:
+      - "8050:8050"
