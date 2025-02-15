@@ -3,8 +3,6 @@ services:
     build: .
     container_name: immo_rechner_app
     image: shajian/immo-rechner:0.1.1
-    ports:
-      - "8008"
     depends_on:
       - nginx
     volumes:
