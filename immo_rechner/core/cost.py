@@ -140,6 +140,17 @@ class PurchaseSideCost(PurchaseCost):
     def compute_side_costs(makler, notar, transfer_tax, purchase_price):
         return (makler + notar + transfer_tax) * purchase_price
 
+    @staticmethod
+    def compute_side_costs_independently(makler, notar, transfer_tax, purchase_price):
+        return {
+            key: (percentage * purchase_price)
+            for (key, percentage) in [
+                ("makler", makler),
+                ("notar", notar),
+                ("transfer_tax", transfer_tax),
+            ]
+        }
+
     def evaluate(self, *args, **kwargs):
         return self.apply_tax_context(
             -self.compute_side_costs(
