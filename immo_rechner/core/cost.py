@@ -23,14 +23,16 @@ class BuildingMaintenance(RentingVsOwnUsageTaxContext, AbstractPosition):
     ):
         RentingVsOwnUsageTaxContext.__init__(self, usage=usage)
 
-        if (not monthly_cost) and (not yearly_cost):
+        if (monthly_cost is None) and (yearly_cost is None):
             raise ValueError("Either monthly_cost or yearly_cost should be not None.")
 
-        self.yearly_cost = monthly_cost * N_MONTHS if monthly_cost else yearly_cost
+        self.yearly_cost = (
+            monthly_cost * N_MONTHS if (monthly_cost is not None) else yearly_cost
+        )
         self.owner_share = owner_share
 
     def evaluate(self, *args, **kwargs):
-        return self.apply_tax_context(-self.yearly_cost * self.owner_share)
+        return -self.yearly_cost * self.owner_share
 
 
 class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
@@ -80,7 +82,7 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
         for _ in range(N_MONTHS):
             self.this_year_interest_cost += self.pay_interest_per_month()
 
-        return self.apply_tax_context(-self.this_year_interest_cost)
+        return -self.this_year_interest_cost
 
 
 class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):

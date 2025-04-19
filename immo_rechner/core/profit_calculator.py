@@ -10,6 +10,7 @@ from immo_rechner.core.cost import (
     PurchaseCost,
     PurchaseSideCost,
 )
+from immo_rechner.core.hypothetical_positions import HypotheticalRentIncome
 from immo_rechner.core.revenue import RentIncome
 from immo_rechner.core.tax_contexts import UsageContext, RentingVsOwnUsageTaxContext
 from immo_rechner.core.utils import get_logger
@@ -127,7 +128,7 @@ class ProfitCalculator:
             income_tax_diff = 0.0
 
         logger.debug(f"Removing tax ({income_tax_diff}) from cashflow")
-        cashflow -= income_tax_diff
+        cashflow -= income_tax_diff  # Why don't we do same for profit_before_taxes (i.e., profit_after_taxes)?
 
         return YearlySummary(
             cashflow=cashflow,
@@ -168,27 +169,38 @@ class ProfitCalculator:
                 )
             )
 
+        if params.usage == UsageContext.RENTING:
+            positions = cls.get_renting_positions(params)
+        elif params.usage == UsageContext.OWN_USE:
+            positions = cls.get_own_usage_positions(params)
+        else:
+            raise ValueError(f"Unknown usage: {params.usage}")
+
+        return cls(positions=positions, yearly_income=params.yearly_income)
+
+    @staticmethod
+    def get_renting_positions(params):
         positions = [
-            RentIncome(monthly_rent=params.monthly_rent, usage=params.usage),
+            RentIncome(monthly_rent=params.monthly_rent, usage=UsageContext.RENTING),
             BuildingMaintenance(
-                usage=params.usage,
+                usage=UsageContext.RENTING,
                 owner_share=params.owner_share,
                 monthly_cost=params.facility_monthly_cost,
             ),
             InterestRate(
-                usage=params.usage,
+                usage=UsageContext.RENTING,
                 yearly_rate=params.yearly_interest_rate,
                 repayment_amount=params.repayment_amount,
                 initial_debt=params.initial_debt,
             ),
             PurchaseCost(
-                usage=params.usage,
+                usage=UsageContext.RENTING,
                 purchase_price=params.purchase_price,
                 land_value=params.land_value,
                 depreciation_rate=params.depreciation_rate,
             ),
             PurchaseSideCost(
-                usage=params.usage,
+                usage=UsageContext.RENTING,
                 purchase_price=params.purchase_price,
                 land_value=params.land_value,
                 approximate_land_value=params.approximate_land_value,
@@ -198,5 +210,35 @@ class ProfitCalculator:
                 depreciation_rate=params.depreciation_rate,
             ),
         ]
+        return positions
 
-        return cls(positions=positions, yearly_income=params.yearly_income)
+    @staticmethod
+    def get_own_usage_positions(params):
+        positions = [
+            HypotheticalRentIncome(
+                usage=UsageContext.OWN_USE,
+                monthly_rent=params.monthly_rent,
+            ),
+            BuildingMaintenance(
+                usage=UsageContext.OWN_USE,
+                owner_share=params.owner_share,
+                monthly_cost=params.facility_monthly_cost,
+            ),
+            InterestRate(
+                usage=UsageContext.OWN_USE,
+                yearly_rate=params.yearly_interest_rate,
+                repayment_amount=params.repayment_amount,
+                initial_debt=params.initial_debt,
+            ),
+            # PurchaseSideCost(
+            #     usage=UsageContext.OWN_USE,
+            #     purchase_price=params.purchase_price,
+            #     land_value=params.land_value,
+            #     approximate_land_value=params.approximate_land_value,
+            #     makler=params.makler,
+            #     notar=params.notar,
+            #     transfer_tax=params.transfer_tax,
+            #     depreciation_rate=1.0, # 100% depreciation for side costs when own_usage
+            # ),
+        ]
+        return positions

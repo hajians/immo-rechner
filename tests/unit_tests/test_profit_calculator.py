@@ -144,11 +144,16 @@ class TestProfitCalculator(TestCase):
                 ),
             ),
             (
-                "own_usage",  # Tax should be equal to zero since it is own use.
-                get_positions(
-                    usage=UsageContext.OWN_USE,
-                    monthly_rent=0.0,
-                ),
+                "own_usage",  # Tax should be equal to zero since it is own_use.
+                [
+                    BuildingMaintenance(usage=UsageContext.OWN_USE, monthly_cost=0.0),
+                    InterestRate(
+                        usage=UsageContext.OWN_USE,
+                        yearly_rate=0.0,
+                        repayment_amount=0.0,
+                        initial_debt=0.0,
+                    ),
+                ],
                 YearlySummary(profit_before_taxes=0.0, income_tax=0.0, cashflow=0.0),
             ),
         ]

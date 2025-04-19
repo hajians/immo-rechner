@@ -21,7 +21,7 @@ def disable_repayment_range_or_value(repayment_value):
 
 def disable_monthly_rent(apt_own_usage):
     if UsageContext(apt_own_usage) == UsageContext.OWN_USE:
-        return True, 0
+        return False, 1500
     elif UsageContext(apt_own_usage) == UsageContext.RENTING:
         return False, 1500
     else:
