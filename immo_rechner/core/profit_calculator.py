@@ -11,7 +11,7 @@ from immo_rechner.core.cost import (
     PurchaseSideCost,
 )
 from immo_rechner.core.revenue import RentIncome
-from immo_rechner.core.tax_contexts import UsageContext
+from immo_rechner.core.tax_contexts import UsageContext, RentingVsOwnUsageTaxContext
 from immo_rechner.core.utils import get_logger
 
 logger = get_logger(__name__)
@@ -61,9 +61,31 @@ class ProfitCalculator:
                 )
                 return item
 
-    def __init__(self, positions: List[AbstractPosition], yearly_income: float):
+    @staticmethod
+    def check_usage(
+        positions: List[Union[AbstractPosition, RentingVsOwnUsageTaxContext]]
+    ):
+        is_own_usage = [p.usage == UsageContext.OWN_USE for p in positions]
+        names = [p.__class__.__name__ for p in positions]
+
+        if all(is_own_usage):
+            return UsageContext.OWN_USE
+        elif not any(is_own_usage):
+            return UsageContext.RENTING
+        else:
+            raise ValueError(
+                f"Not all usages are consistent: {list(zip(names, is_own_usage))}"
+            )
+
+    def __init__(
+        self,
+        positions: List[Union[AbstractPosition, RentingVsOwnUsageTaxContext]],
+        yearly_income: float,
+    ):
         self.positions = positions
         self.yearly_income = yearly_income
+
+        self.usage = self.check_usage(self.positions)
 
         self.interest_rate_position = self.fetch_interest_rate_position(self.positions)
         self.initial_debt = self.interest_rate_position.initial_debt
@@ -146,7 +168,7 @@ class ProfitCalculator:
             )
 
         positions = [
-            RentIncome(monthly_rent=params.monthly_rent),
+            RentIncome(monthly_rent=params.monthly_rent, usage=params.usage),
             BuildingMaintenance(
                 usage=params.usage,
                 owner_share=params.owner_share,
