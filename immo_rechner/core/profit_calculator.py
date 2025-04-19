@@ -65,17 +65,15 @@ class ProfitCalculator:
     def check_usage(
         positions: List[Union[AbstractPosition, RentingVsOwnUsageTaxContext]]
     ):
-        is_own_usage = [p.usage == UsageContext.OWN_USE for p in positions]
+
+        for item in UsageContext:
+            if all([p.usage == item for p in positions]):
+                return item
+
+        usage = [p.usage for p in positions]
         names = [p.__class__.__name__ for p in positions]
 
-        if all(is_own_usage):
-            return UsageContext.OWN_USE
-        elif not any(is_own_usage):
-            return UsageContext.RENTING
-        else:
-            raise ValueError(
-                f"Not all usages are consistent: {list(zip(names, is_own_usage))}"
-            )
+        raise ValueError(f"Not all usages are consistent: {list(zip(names, usage))}")
 
     def __init__(
         self,
@@ -121,9 +119,12 @@ class ProfitCalculator:
             profit_before_taxes += value
             cashflow += value if position.is_cashflow else 0.0
 
-        income_tax_diff = self.get_yearly_income_tax(
-            self.yearly_income + profit_before_taxes
-        ) - self.get_yearly_income_tax(self.yearly_income)
+        if self.usage == UsageContext.RENTING:
+            income_tax_diff = self.get_yearly_income_tax(
+                self.yearly_income + profit_before_taxes
+            ) - self.get_yearly_income_tax(self.yearly_income)
+        else:
+            income_tax_diff = 0.0
 
         logger.debug(f"Removing tax ({income_tax_diff}) from cashflow")
         cashflow -= income_tax_diff
