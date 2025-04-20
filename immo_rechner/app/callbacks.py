@@ -57,7 +57,7 @@ def update_graph(
     own_capital,
     maker_provision,
 ):
-    fig = make_subplots(rows=2, cols=2)
+    fig = make_subplots(rows=3, cols=2, vertical_spacing=0.1)
 
     usage = UsageContext(apt_own_usage)
     logger.info(f"Using Tax context {usage}")
@@ -131,6 +131,31 @@ def update_graph(
             col=2,
         )
 
+        fig.add_trace(
+            go.Scatter(
+                x=df.year,
+                y=100
+                * df.profit_before_taxes.cumsum()
+                / (df.total_paid + own_capital)
+                / df.year,
+                marker=dict(color=color_maps[repayment]),
+                showlegend=False,
+            ),
+            row=3,
+            col=1,
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=df.year,
+                y=df.profit_before_taxes.cumsum(),
+                marker=dict(color=color_maps[repayment]),
+                showlegend=False,
+            ),
+            row=3,
+            col=2,
+        )
+
     fig.add_annotation(
         text=f"Initial debt: {profit_calculater.initial_debt}",
         row=1,
@@ -141,11 +166,13 @@ def update_graph(
     )
 
     fig.update_layout(
-        xaxis4_title=dict(text="Year"),
-        xaxis3_title=dict(text="Year"),
+        xaxis5_title=dict(text="Year"),
+        xaxis6_title=dict(text="Year"),
         yaxis2_title=dict(text="Remaining debt (EUR)"),
         yaxis3_title=dict(text="Tax benefit (EUR)"),
         yaxis4_title=dict(text="Yearly interest cost (EUR)"),
+        yaxis5_title=dict(text="Return rate (%)"),
+        height=800,
     )
 
     return fig

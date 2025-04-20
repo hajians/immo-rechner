@@ -29,6 +29,7 @@ class YearlySummary(BaseModel):
     remaining_debt: Optional[float] = None
     cumulative_interest_cost: Optional[float] = None
     yearly_interest_cost: Optional[float] = None
+    total_paid: Optional[float] = None
 
     @computed_field
     @property
@@ -142,6 +143,7 @@ class ProfitCalculator:
             remaining_debt=self.interest_rate_position.remaining_debt,
             cumulative_interest_cost=self.interest_rate_position.total_interest_cost,
             yearly_interest_cost=self.interest_rate_position.this_year_interest_cost,
+            total_paid=self.interest_rate_position.total_paid,
         )
 
     def simulate(
