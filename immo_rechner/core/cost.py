@@ -164,3 +164,43 @@ class PurchaseSideCost(PurchaseCost):
             )
             * self.depreciation_rate
         )
+
+
+class InstantSideCostWriteOff(PurchaseSideCost):
+
+    def __init__(
+        self,
+        usage: UsageContext,
+        purchase_price: float,
+        makler: float = 0.0357,
+        notar: float = 0.015,
+        transfer_tax: float = 0.06,
+    ):
+
+        super().__init__(
+            usage=usage,
+            purchase_price=purchase_price,
+            land_value=0.0,  # Not used
+            approximate_land_value=False,  # Not used
+            depreciation_rate=0.0,  # Not used
+            makler=makler,
+            notar=notar,
+            transfer_tax=transfer_tax,
+        )
+
+        self.year_counter = 0
+
+    def reset(self):
+        self.year_counter = 0
+
+    def evaluate(self, *args, **kwargs):
+        self.year_counter += 1
+        if self.year_counter == 1:
+            return -self.compute_side_costs(
+                makler=self.makler,
+                notar=self.notar,
+                transfer_tax=self.transfer_tax,
+                purchase_price=self.purchase_price,
+            )
+        else:
+            return 0.0

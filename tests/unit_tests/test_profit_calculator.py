@@ -110,13 +110,13 @@ class TestProfitCalculator(TestCase):
             ),
             (
                 """
-                        Side note:
-                        In order to compute the change in mortgage after one year we have the following closed form (n=12):
-                                delta = ((1+p/n)^n - 1)*initial_debt - ((1+p)^n - 1)*x/p,
-                        where p is interest rate per year, x is the amount we pay towards mortgage.                             
-                        For no profit scenario we would like to have delta == 0.0, i.e., all we paid per month
-                        went for interest rate, aka no profit.
-                    """
+                            Side note:
+                            In order to compute the change in mortgage after one year we have the following closed form (n=12):
+                                    delta = ((1+p/n)^n - 1)*initial_debt - ((1+p)^n - 1)*x/p,
+                            where p is interest rate per year, x is the amount we pay towards mortgage.                             
+                            For no profit scenario we would like to have delta == 0.0, i.e., all we paid per month
+                            went for interest rate, aka no profit.
+                        """
                 "with_interest_rate_no_profit",
                 get_positions(
                     monthly_rent=416.6666,
@@ -256,3 +256,31 @@ class TestProfitCalculator(TestCase):
         # Then
         self.assertEqual(len(output), 10)
         self.assertEqual(output_pd.shape[0], 10)
+
+    def test_get_own_usage_positions(self):
+        # Given
+        params = InputParameters(
+            usage=UsageContext.RENTING,
+            yearly_income=0,
+            monthly_rent=1_000,
+            facility_monthly_cost=200.0,
+            owner_share=1.0,
+            repayment_amount=1_000,
+            yearly_interest_rate=0.0,
+            initial_debt=100_000,
+            depreciation_rate=0.01,
+            purchase_price=100_000,
+            appreciation_rate=0.05,
+            makler=0.01,
+            notar=0.01,
+            transfer_tax=0.01,
+        )
+        positions = ProfitCalculator.get_own_usage_positions(params=params)
+        pc = ProfitCalculator(positions=positions, yearly_income=params.yearly_income)
+
+        # When
+        output = pc.yearly_simulation()
+
+        # Then
+        self.assertAlmostEqual(output.profit_before_taxes, 11600)
+        self.assertAlmostEqual(output.cashflow, -2400)

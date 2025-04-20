@@ -9,8 +9,12 @@ from immo_rechner.core.cost import (
     InterestRate,
     PurchaseCost,
     PurchaseSideCost,
+    InstantSideCostWriteOff,
 )
-from immo_rechner.core.hypothetical_positions import HypotheticalRentIncome
+from immo_rechner.core.hypothetical_positions import (
+    HypotheticalRentIncome,
+    HypotheticalAppreciation,
+)
 from immo_rechner.core.revenue import RentIncome
 from immo_rechner.core.tax_contexts import UsageContext, RentingVsOwnUsageTaxContext
 from immo_rechner.core.utils import get_logger
@@ -49,6 +53,7 @@ class InputParameters(BaseModel):
     makler: float = 0.0357
     notar: float = 0.015
     transfer_tax: float = 0.06
+    appreciation_rate: float = 0.03
 
 
 class ProfitCalculator:
@@ -179,7 +184,7 @@ class ProfitCalculator:
         return cls(positions=positions, yearly_income=params.yearly_income)
 
     @staticmethod
-    def get_renting_positions(params):
+    def get_renting_positions(params: InputParameters):
         positions = [
             RentIncome(monthly_rent=params.monthly_rent, usage=UsageContext.RENTING),
             BuildingMaintenance(
@@ -213,7 +218,7 @@ class ProfitCalculator:
         return positions
 
     @staticmethod
-    def get_own_usage_positions(params):
+    def get_own_usage_positions(params: InputParameters):
         positions = [
             HypotheticalRentIncome(
                 usage=UsageContext.OWN_USE,
@@ -221,7 +226,7 @@ class ProfitCalculator:
             ),
             BuildingMaintenance(
                 usage=UsageContext.OWN_USE,
-                owner_share=params.owner_share,
+                owner_share=1.0,  # Owner pays all
                 monthly_cost=params.facility_monthly_cost,
             ),
             InterestRate(
@@ -230,15 +235,17 @@ class ProfitCalculator:
                 repayment_amount=params.repayment_amount,
                 initial_debt=params.initial_debt,
             ),
-            # PurchaseSideCost(
-            #     usage=UsageContext.OWN_USE,
-            #     purchase_price=params.purchase_price,
-            #     land_value=params.land_value,
-            #     approximate_land_value=params.approximate_land_value,
-            #     makler=params.makler,
-            #     notar=params.notar,
-            #     transfer_tax=params.transfer_tax,
-            #     depreciation_rate=1.0, # 100% depreciation for side costs when own_usage
-            # ),
+            HypotheticalAppreciation(
+                usage=UsageContext.OWN_USE,
+                initial_price=params.purchase_price,
+                appreciation_rate=params.appreciation_rate,
+            ),
+            InstantSideCostWriteOff(
+                usage=UsageContext.OWN_USE,
+                purchase_price=params.purchase_price,
+                makler=params.makler,
+                notar=params.notar,
+                transfer_tax=params.transfer_tax,
+            ),
         ]
         return positions
