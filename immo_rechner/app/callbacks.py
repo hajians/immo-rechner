@@ -21,7 +21,7 @@ def disable_repayment_range_or_value(repayment_value):
 
 def disable_monthly_rent(apt_own_usage):
     if UsageContext(apt_own_usage) == UsageContext.OWN_USE:
-        return True, 0
+        return False, 1500
     elif UsageContext(apt_own_usage) == UsageContext.RENTING:
         return False, 1500
     else:
@@ -57,7 +57,7 @@ def update_graph(
     own_capital,
     maker_provision,
 ):
-    fig = make_subplots(rows=2, cols=2)
+    fig = make_subplots(rows=3, cols=2, vertical_spacing=0.1)
 
     usage = UsageContext(apt_own_usage)
     logger.info(f"Using Tax context {usage}")
@@ -86,7 +86,7 @@ def update_graph(
         )
 
         profit_calculater = ProfitCalculator.from_input_params(input_parameters)
-        df = profit_calculater.simulate(n_years=num_years, to_pandas=True)
+        df = profit_calculater.simulate(n_years=num_years)
         fig.add_trace(
             go.Scatter(
                 x=df.year,
@@ -131,6 +131,28 @@ def update_graph(
             col=2,
         )
 
+        fig.add_trace(
+            go.Scatter(
+                x=df.year,
+                y=100 * df.return_rate,
+                marker=dict(color=color_maps[repayment]),
+                showlegend=False,
+            ),
+            row=3,
+            col=1,
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=df.year,
+                y=df.cumulative_profit_before_tax,
+                marker=dict(color=color_maps[repayment]),
+                showlegend=False,
+            ),
+            row=3,
+            col=2,
+        )
+
     fig.add_annotation(
         text=f"Initial debt: {profit_calculater.initial_debt}",
         row=1,
@@ -141,11 +163,13 @@ def update_graph(
     )
 
     fig.update_layout(
-        xaxis4_title=dict(text="Year"),
-        xaxis3_title=dict(text="Year"),
+        xaxis5_title=dict(text="Year"),
+        xaxis6_title=dict(text="Year"),
         yaxis2_title=dict(text="Remaining debt (EUR)"),
         yaxis3_title=dict(text="Tax benefit (EUR)"),
         yaxis4_title=dict(text="Yearly interest cost (EUR)"),
+        yaxis5_title=dict(text="Return rate (%)"),
+        height=800,
     )
 
     return fig

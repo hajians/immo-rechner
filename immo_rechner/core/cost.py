@@ -23,14 +23,16 @@ class BuildingMaintenance(RentingVsOwnUsageTaxContext, AbstractPosition):
     ):
         RentingVsOwnUsageTaxContext.__init__(self, usage=usage)
 
-        if (not monthly_cost) and (not yearly_cost):
+        if (monthly_cost is None) and (yearly_cost is None):
             raise ValueError("Either monthly_cost or yearly_cost should be not None.")
 
-        self.yearly_cost = monthly_cost * N_MONTHS if monthly_cost else yearly_cost
+        self.yearly_cost = (
+            monthly_cost * N_MONTHS if (monthly_cost is not None) else yearly_cost
+        )
         self.owner_share = owner_share
 
     def evaluate(self, *args, **kwargs):
-        return self.apply_tax_context(-self.yearly_cost * self.owner_share)
+        return -self.yearly_cost * self.owner_share
 
 
 class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
@@ -57,6 +59,7 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
         self.initial_debt = initial_debt
         self.total_interest_cost = 0.0
         self.this_year_interest_cost = 0.0
+        self.total_paid = 0.0
 
         self.counter = 0
 
@@ -64,11 +67,13 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
         self.remaining_debt = self.initial_debt
         self.total_interest_cost = 0.0
         self.this_year_interest_cost = 0.0
+        self.total_paid = 0.0
 
     def pay_interest_per_month(self):
         cost = (self.yearly_rate / N_MONTHS) * self.remaining_debt
         self.total_interest_cost += cost
         self.remaining_debt -= self.repayment_amount - cost
+        self.total_paid += self.repayment_amount
 
         self.counter += 1
 
@@ -80,7 +85,7 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
         for _ in range(N_MONTHS):
             self.this_year_interest_cost += self.pay_interest_per_month()
 
-        return self.apply_tax_context(-self.this_year_interest_cost)
+        return -self.this_year_interest_cost
 
 
 class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):
@@ -112,6 +117,10 @@ class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):
         )
 
 
+def compute_side_costs(makler, notar, transfer_tax, purchase_price):
+    return (makler + notar + transfer_tax) * purchase_price
+
+
 class PurchaseSideCost(PurchaseCost):
 
     def __init__(
@@ -137,10 +146,6 @@ class PurchaseSideCost(PurchaseCost):
         self.transfer_tax = transfer_tax
 
     @staticmethod
-    def compute_side_costs(makler, notar, transfer_tax, purchase_price):
-        return (makler + notar + transfer_tax) * purchase_price
-
-    @staticmethod
     def compute_side_costs_independently(makler, notar, transfer_tax, purchase_price):
         return {
             key: (percentage * purchase_price)
@@ -153,7 +158,7 @@ class PurchaseSideCost(PurchaseCost):
 
     def evaluate(self, *args, **kwargs):
         return self.apply_tax_context(
-            -self.compute_side_costs(
+            -compute_side_costs(
                 makler=self.makler,
                 notar=self.notar,
                 transfer_tax=self.transfer_tax,
@@ -162,3 +167,43 @@ class PurchaseSideCost(PurchaseCost):
             )
             * self.depreciation_rate
         )
+
+
+class InstantSideCostWriteOff(PurchaseSideCost):
+
+    def __init__(
+        self,
+        usage: UsageContext,
+        purchase_price: float,
+        makler: float = 0.0357,
+        notar: float = 0.015,
+        transfer_tax: float = 0.06,
+    ):
+
+        super().__init__(
+            usage=usage,
+            purchase_price=purchase_price,
+            land_value=0.0,  # Not used
+            approximate_land_value=False,  # Not used
+            depreciation_rate=0.0,  # Not used
+            makler=makler,
+            notar=notar,
+            transfer_tax=transfer_tax,
+        )
+
+        self.year_counter = 0
+
+    def reset(self):
+        self.year_counter = 0
+
+    def evaluate(self, *args, **kwargs):
+        self.year_counter += 1
+        if self.year_counter == 1:
+            return -compute_side_costs(
+                makler=self.makler,
+                notar=self.notar,
+                transfer_tax=self.transfer_tax,
+                purchase_price=self.purchase_price,
+            )
+        else:
+            return 0.0

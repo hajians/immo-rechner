@@ -24,7 +24,7 @@ def get_positions(
     depreciation_rate=0.02,
 ):
     return [
-        RentIncome(monthly_rent=monthly_rent),
+        RentIncome(monthly_rent=monthly_rent, usage=usage),
         BuildingMaintenance(
             usage=usage, owner_share=owner_share, monthly_cost=facility_monthly_cost
         ),
@@ -110,13 +110,13 @@ class TestProfitCalculator(TestCase):
             ),
             (
                 """
-                    Side note:
-                    In order to compute the change in mortgage after one year we have the following closed form (n=12):
-                            delta = ((1+p/n)^n - 1)*initial_debt - ((1+p)^n - 1)*x/p,
-                    where p is interest rate per year, x is the amount we pay towards mortgage.                             
-                    For no profit scenario we would like to have delta == 0.0, i.e., all we paid per month
-                    went for interest rate, aka no profit.
-                """
+                            Side note:
+                            In order to compute the change in mortgage after one year we have the following closed form (n=12):
+                                    delta = ((1+p/n)^n - 1)*initial_debt - ((1+p)^n - 1)*x/p,
+                            where p is interest rate per year, x is the amount we pay towards mortgage.                             
+                            For no profit scenario we would like to have delta == 0.0, i.e., all we paid per month
+                            went for interest rate, aka no profit.
+                        """
                 "with_interest_rate_no_profit",
                 get_positions(
                     monthly_rent=416.6666,
@@ -144,11 +144,16 @@ class TestProfitCalculator(TestCase):
                 ),
             ),
             (
-                "own_usage",  # Tax should be equal to zero since it is own use.
-                get_positions(
-                    usage=UsageContext.OWN_USE,
-                    monthly_rent=0.0,
-                ),
+                "own_usage",  # Tax should be equal to zero since it is own_use.
+                [
+                    BuildingMaintenance(usage=UsageContext.OWN_USE, monthly_cost=0.0),
+                    InterestRate(
+                        usage=UsageContext.OWN_USE,
+                        yearly_rate=0.0,
+                        repayment_amount=0.0,
+                        initial_debt=0.0,
+                    ),
+                ],
                 YearlySummary(profit_before_taxes=0.0, income_tax=0.0, cashflow=0.0),
             ),
         ]
@@ -160,7 +165,7 @@ class TestProfitCalculator(TestCase):
         self, name, positions, expected_output: YearlySummary, mock_tax
     ):
         # Given
-        pc = ProfitCalculator(positions=positions, yearly_income=100_000)
+        pc = ProfitCalculator(positions=positions, yearly_income=100_000, own_capital=0)
         mock_tax.side_effect = lambda x: 0.2 * x
 
         # When
@@ -172,6 +177,51 @@ class TestProfitCalculator(TestCase):
         )
         self.assertAlmostEqual(output.income_tax, expected_output.income_tax, places=1)
         self.assertAlmostEqual(output.cashflow, expected_output.cashflow, places=1)
+
+    @parameterized.expand(
+        [
+            (
+                "renting",
+                get_positions(
+                    monthly_rent=500,
+                    owner_share=0.0,
+                    yearly_interest_rate=0.0,
+                    depreciation_rate=0.0,
+                ),
+                UsageContext.RENTING,
+            ),
+            (
+                "own usage",
+                get_positions(
+                    usage=UsageContext.OWN_USE,
+                    monthly_rent=500,
+                    owner_share=0.0,
+                    yearly_interest_rate=0.0,
+                    depreciation_rate=0.0,
+                ),
+                UsageContext.OWN_USE,
+            ),
+        ]
+    )
+    def test_check_usage(self, name, positions, expected):
+        # When
+        output = ProfitCalculator.check_usage(positions)
+
+        # Then
+        self.assertEqual(output, expected)
+
+    def test_check_usage_raise_error(self):
+        # Given
+        positions = [
+            RentIncome(monthly_rent=1000, usage=UsageContext.RENTING),
+            BuildingMaintenance(
+                usage=UsageContext.OWN_USE, owner_share=0.5, monthly_cost=200
+            ),
+        ]
+
+        # When, Then
+        with self.assertRaises(ValueError):
+            ProfitCalculator.check_usage(positions)
 
     @mock.patch(
         "immo_rechner.core.profit_calculator.ProfitCalculator.get_yearly_income_tax"
@@ -200,9 +250,39 @@ class TestProfitCalculator(TestCase):
         pc = self.get_profit_calculator()
 
         # When
-        output = pc.simulate(n_years=10)
-        output_pd = pc.simulate(n_years=10, to_pandas=True)
+        output_pd = pc.simulate(n_years=10)
 
         # Then
-        self.assertEqual(len(output), 10)
         self.assertEqual(output_pd.shape[0], 10)
+
+    def test_get_own_usage_positions(self):
+        # Given
+        params = InputParameters(
+            usage=UsageContext.RENTING,
+            yearly_income=0,
+            monthly_rent=1_000,
+            facility_monthly_cost=200.0,
+            owner_share=1.0,
+            repayment_amount=1_000,
+            yearly_interest_rate=0.0,
+            initial_debt=100_000,
+            depreciation_rate=0.01,
+            purchase_price=100_000,
+            appreciation_rate=0.05,
+            makler=0.01,
+            notar=0.01,
+            transfer_tax=0.01,
+        )
+        positions = ProfitCalculator.get_own_usage_positions(params=params)
+        pc = ProfitCalculator(
+            positions=positions,
+            yearly_income=params.yearly_income,
+            own_capital=params.own_capital,
+        )
+
+        # When
+        output = pc.yearly_simulation()
+
+        # Then
+        self.assertAlmostEqual(output.profit_before_taxes, 11600)
+        self.assertAlmostEqual(output.cashflow, -2400)
