@@ -67,6 +67,7 @@ class InterestRate(RentingVsOwnUsageTaxContext, AbstractPosition):
         self.remaining_debt = self.initial_debt
         self.total_interest_cost = 0.0
         self.this_year_interest_cost = 0.0
+        self.total_paid = 0.0
 
     def pay_interest_per_month(self):
         cost = (self.yearly_rate / N_MONTHS) * self.remaining_debt
