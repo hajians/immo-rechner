@@ -179,6 +179,14 @@ class ProfitCalculator:
         return self.postprocess_simulation(df_output)
 
     def postprocess_simulation(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        This method computes
+
+        return_rate: defined as
+        $
+        \frac{1}{n_years} \frac{\sum_{i=1}^{n_years} profit_i}{initial_capital + \sum_{i=1}^{n_years} paid_i}
+        $
+        """
         if self.usage == UsageContext.OWN_USE:
             return_rate = (
                 df.profit_before_taxes.cumsum()
