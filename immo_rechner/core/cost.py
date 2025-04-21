@@ -140,7 +140,7 @@ class PurchaseSideCost(PurchaseCost):
         self.notar = notar
         self.transfer_tax = transfer_tax
 
-    @staticmethod
+    @staticmethod  # Extract this method to a function
     def compute_side_costs(makler, notar, transfer_tax, purchase_price):
         return (makler + notar + transfer_tax) * purchase_price
 

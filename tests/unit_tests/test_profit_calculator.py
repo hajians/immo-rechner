@@ -165,7 +165,7 @@ class TestProfitCalculator(TestCase):
         self, name, positions, expected_output: YearlySummary, mock_tax
     ):
         # Given
-        pc = ProfitCalculator(positions=positions, yearly_income=100_000)
+        pc = ProfitCalculator(positions=positions, yearly_income=100_000, own_capital=0)
         mock_tax.side_effect = lambda x: 0.2 * x
 
         # When
@@ -250,11 +250,9 @@ class TestProfitCalculator(TestCase):
         pc = self.get_profit_calculator()
 
         # When
-        output = pc.simulate(n_years=10)
-        output_pd = pc.simulate(n_years=10, to_pandas=True)
+        output_pd = pc.simulate(n_years=10)
 
         # Then
-        self.assertEqual(len(output), 10)
         self.assertEqual(output_pd.shape[0], 10)
 
     def test_get_own_usage_positions(self):
@@ -276,7 +274,11 @@ class TestProfitCalculator(TestCase):
             transfer_tax=0.01,
         )
         positions = ProfitCalculator.get_own_usage_positions(params=params)
-        pc = ProfitCalculator(positions=positions, yearly_income=params.yearly_income)
+        pc = ProfitCalculator(
+            positions=positions,
+            yearly_income=params.yearly_income,
+            own_capital=params.own_capital,
+        )
 
         # When
         output = pc.yearly_simulation()

@@ -86,7 +86,7 @@ def update_graph(
         )
 
         profit_calculater = ProfitCalculator.from_input_params(input_parameters)
-        df = profit_calculater.simulate(n_years=num_years, to_pandas=True)
+        df = profit_calculater.simulate(n_years=num_years)
         fig.add_trace(
             go.Scatter(
                 x=df.year,
@@ -134,10 +134,7 @@ def update_graph(
         fig.add_trace(
             go.Scatter(
                 x=df.year,
-                y=100
-                * df.profit_before_taxes.cumsum()
-                / (df.total_paid + own_capital)
-                / df.year,
+                y=100 * df.return_rate,
                 marker=dict(color=color_maps[repayment]),
                 showlegend=False,
             ),

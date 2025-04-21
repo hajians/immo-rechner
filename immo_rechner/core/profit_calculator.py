@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 import pandas as pd
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, model_validator
 
 from immo_rechner.core.abstract_position import AbstractPosition
 from immo_rechner.core.cost import (
@@ -56,6 +56,26 @@ class InputParameters(BaseModel):
     transfer_tax: float = 0.06
     appreciation_rate: float = 0.03
 
+    @model_validator(mode="after")
+    def compute_initial_debt_if_needed(self):
+        side_costs = PurchaseSideCost.compute_side_costs(
+            makler=self.makler,
+            notar=self.notar,
+            transfer_tax=self.transfer_tax,
+            purchase_price=self.purchase_price,
+        )
+
+        if self.own_capital is not None:
+            logger.info(f"Compute initial_debt")
+            self.initial_debt = self.purchase_price - self.own_capital + side_costs
+        elif (self.own_capital is None) and (self.initial_debt is not None):
+            logger.info("Compute own_capital")
+            self.own_capital = self.purchase_price - self.initial_debt + side_costs
+        else:
+            raise ValueError("both initial_debt and own_capital cannot be none.")
+
+        return self
+
 
 class ProfitCalculator:
 
@@ -86,9 +106,11 @@ class ProfitCalculator:
         self,
         positions: List[Union[AbstractPosition, RentingVsOwnUsageTaxContext]],
         yearly_income: float,
+        own_capital: float,
     ):
         self.positions = positions
         self.yearly_income = yearly_income
+        self.own_capital = own_capital
 
         self.usage = self.check_usage(self.positions)
 
@@ -146,35 +168,31 @@ class ProfitCalculator:
             total_paid=self.interest_rate_position.total_paid,
         )
 
-    def simulate(
-        self, n_years: int, to_pandas: bool = False
-    ) -> Union[List, pd.DataFrame]:
+    def simulate(self, n_years: int) -> Union[List, pd.DataFrame]:
         output = []
         for year in range(1, n_years + 1):
             output.append(dict(year=year, **self.yearly_simulation().model_dump()))
 
-        if to_pandas:
-            return pd.DataFrame.from_records(output)
+        df_output = pd.DataFrame.from_records(output)
 
-        return output
+        return self.postprocess_simulation(df_output)
+
+    def postprocess_simulation(self, df: pd.DataFrame) -> pd.DataFrame:
+        if self.usage == UsageContext.OWN_USE:
+            return_rate = (
+                df.profit_before_taxes.cumsum()
+                / (df.total_paid + self.own_capital)
+                / df.year
+            )
+        else:
+            return_rate = None
+
+        return df.assign(return_rate=return_rate)
 
     @classmethod
     def from_input_params(cls, input_params: InputParameters):
 
         params = input_params.model_copy()
-
-        if params.own_capital is not None:
-            logger.info(f"Ignoring initial_debt: {params.initial_debt}")
-            params.initial_debt = (
-                params.purchase_price
-                - params.own_capital
-                + PurchaseSideCost.compute_side_costs(
-                    makler=params.makler,
-                    notar=params.notar,
-                    transfer_tax=params.transfer_tax,
-                    purchase_price=params.purchase_price,
-                )
-            )
 
         if params.usage == UsageContext.RENTING:
             positions = cls.get_renting_positions(params)
@@ -183,7 +201,11 @@ class ProfitCalculator:
         else:
             raise ValueError(f"Unknown usage: {params.usage}")
 
-        return cls(positions=positions, yearly_income=params.yearly_income)
+        return cls(
+            positions=positions,
+            yearly_income=params.yearly_income,
+            own_capital=params.own_capital,
+        )
 
     @staticmethod
     def get_renting_positions(params: InputParameters):
