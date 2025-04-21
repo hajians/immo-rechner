@@ -10,6 +10,7 @@ from immo_rechner.core.cost import (
     PurchaseCost,
     PurchaseSideCost,
     InstantSideCostWriteOff,
+    compute_side_costs,
 )
 from immo_rechner.core.hypothetical_positions import (
     HypotheticalRentIncome,
@@ -58,7 +59,7 @@ class InputParameters(BaseModel):
 
     @model_validator(mode="after")
     def compute_initial_debt_if_needed(self):
-        side_costs = PurchaseSideCost.compute_side_costs(
+        side_costs = compute_side_costs(
             makler=self.makler,
             notar=self.notar,
             transfer_tax=self.transfer_tax,

@@ -116,6 +116,10 @@ class PurchaseCost(RentingVsOwnUsageTaxContext, AbstractPosition):
         )
 
 
+def compute_side_costs(makler, notar, transfer_tax, purchase_price):
+    return (makler + notar + transfer_tax) * purchase_price
+
+
 class PurchaseSideCost(PurchaseCost):
 
     def __init__(
@@ -140,10 +144,6 @@ class PurchaseSideCost(PurchaseCost):
         self.notar = notar
         self.transfer_tax = transfer_tax
 
-    @staticmethod  # Extract this method to a function
-    def compute_side_costs(makler, notar, transfer_tax, purchase_price):
-        return (makler + notar + transfer_tax) * purchase_price
-
     @staticmethod
     def compute_side_costs_independently(makler, notar, transfer_tax, purchase_price):
         return {
@@ -157,7 +157,7 @@ class PurchaseSideCost(PurchaseCost):
 
     def evaluate(self, *args, **kwargs):
         return self.apply_tax_context(
-            -self.compute_side_costs(
+            -compute_side_costs(
                 makler=self.makler,
                 notar=self.notar,
                 transfer_tax=self.transfer_tax,
@@ -198,7 +198,7 @@ class InstantSideCostWriteOff(PurchaseSideCost):
     def evaluate(self, *args, **kwargs):
         self.year_counter += 1
         if self.year_counter == 1:
-            return -self.compute_side_costs(
+            return -compute_side_costs(
                 makler=self.makler,
                 notar=self.notar,
                 transfer_tax=self.transfer_tax,
