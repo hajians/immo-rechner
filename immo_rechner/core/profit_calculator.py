@@ -161,7 +161,7 @@ class ProfitCalculator:
 
         return YearlySummary(
             cashflow=cashflow,
-            profit_before_taxes=profit_before_taxes,  # This includes depreciation.
+            profit_before_taxes=profit_before_taxes,
             income_tax=income_tax_diff,
             remaining_debt=self.interest_rate_position.remaining_debt,
             cumulative_interest_cost=self.interest_rate_position.total_interest_cost,
@@ -188,15 +188,22 @@ class ProfitCalculator:
         $
         """
         if self.usage == UsageContext.OWN_USE:
+            cumulative_profit_before_tax = df.profit_before_taxes.cumsum()
+
             return_rate = (
-                df.profit_before_taxes.cumsum()
+                cumulative_profit_before_tax
                 / (df.total_paid + self.own_capital)
                 / df.year
             )
+
         else:
+            cumulative_profit_before_tax = None
             return_rate = None
 
-        return df.assign(return_rate=return_rate)
+        return df.assign(
+            return_rate=return_rate,
+            cumulative_profit_before_tax=cumulative_profit_before_tax,
+        )
 
     @classmethod
     def from_input_params(cls, input_params: InputParameters):

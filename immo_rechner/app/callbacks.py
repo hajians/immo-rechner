@@ -145,7 +145,7 @@ def update_graph(
         fig.add_trace(
             go.Scatter(
                 x=df.year,
-                y=df.profit_before_taxes.cumsum(),
+                y=df.cumulative_profit_before_tax,
                 marker=dict(color=color_maps[repayment]),
                 showlegend=False,
             ),
